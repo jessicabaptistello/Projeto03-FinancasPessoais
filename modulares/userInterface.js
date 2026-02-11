@@ -51,7 +51,7 @@ export function initUI() {
 
   if (missing.length > 0) {
     console.error("Elementos não encontrados no HTML:", missing);
-    alert("Erro: faltam IDs/classes no HTML. Veja o Console (F12).");
+    alert("Erro. Veja o Console (F12).");
     return false;
   }
 
