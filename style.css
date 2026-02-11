@@ -5,27 +5,25 @@
 }
 
 :root {
-  --bg: #fff7fb;             
-  --surface: #ffffff;         
-  --sidebar: #2a1930;         
-  --sidebar-soft: #3a2443;
+  --bg: #fff7fb;
+  --surface: #ffffff;
+  --sidebar: #2a1930;
 
-  --text: #2b2231;            
-  --muted: #6f6476;           
+  --text: #2b2231;
+  --muted: #6f6476;
 
-  --primary: #ff5fa2;         
+  --primary: #ff5fa2;
   --primary-soft: rgba(255, 95, 162, 0.18);
 
-  --accent: #8b5cf6;          
+  --accent: #8b5cf6;
   --accent-soft: rgba(139, 92, 246, 0.14);
 
-  --income: #34d399;          
-  --expense: #b3124a;         
+  --income: #34d399;   
+  --expense: #b3124a;  
 
   --border: rgba(43, 34, 49, 0.10);
   --shadow: 0 14px 32px rgba(25, 10, 30, 0.10);
 }
-
 
 body {
   font-family: Arial, Helvetica, sans-serif;
@@ -56,53 +54,14 @@ body {
 }
 
 .logo {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 800;
   color: #ffffff;
-  font-family: cursive, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
-
 
 .financas {
   color: #ffffff;
-}
-
-.lista-de-servicos {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.containers-services {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 10px;
-  border-radius: 12px;
-  color: rgba(255, 255, 255, 0.92);
-  transition: 0.2s;
-}
-
-.containers-services:hover {
-  background: rgba(255, 255, 255, 0.06);
-  cursor: pointer;
-}
-
-
-.containers-services.is-active {
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-
-.first {
-  background: rgba(255, 95, 162, 0.18);
-  border: 1px solid rgba(255, 95, 162, 0.32);
-}
-
-.menu-itens {
-  list-style: none;
-  font-size: 14px;
 }
 
 
@@ -164,11 +123,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 22px;
-
- 
   align-items: stretch;
 }
-
 
 .cards,
 .transacoes {
@@ -177,9 +133,10 @@ body {
   margin: 0 auto;
 }
 
+
 .cards-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   width: 100%;
 }
@@ -198,9 +155,9 @@ body {
 .titulo-card {
   color: var(--muted);
   font-size: 13px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .valor {
@@ -317,7 +274,7 @@ body {
   min-width: 0;
 }
 
-
+/* CATEGORIAS */
 .categoria-container {
   display: flex;
   flex-wrap: wrap;
@@ -474,9 +431,9 @@ body {
   background: #fff;
 }
 
-
 .etiqueta-receita { color: var(--income); }
 .etiqueta-despesa { color: var(--expense); }
+.etiqueta-poupanca { color: var(--accent); }
 
 .data-transacao {
   color: var(--muted);
@@ -492,6 +449,7 @@ body {
 
 .positivo { color: var(--income); }
 .negativo { color: var(--expense); }
+.neutro { color: var(--accent); }
 
 .btn-remover {
   margin-left: 8px;
@@ -538,6 +496,10 @@ body {
 }
 
 
+@media (max-width: 1200px) {
+  .cards-container { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 980px) {
   body {
     grid-template-columns: 1fr;
@@ -547,15 +509,8 @@ body {
       "footer";
   }
 
-  .sidebar {
-    display: none;
-  }
+  .sidebar { display: none; }
 
-  .cards-container {
-    grid-template-columns: 1fr;
-  }
-
-  .transacoes {
-    grid-template-columns: 1fr;
-  }
+  .transacoes { grid-template-columns: 1fr; }
+  .cards-container { grid-template-columns: 1fr; }
 }

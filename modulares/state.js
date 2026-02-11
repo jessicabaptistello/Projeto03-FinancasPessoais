@@ -1,26 +1,3 @@
-/*
-OBJETIVO:
-Centralizar o controle das transações em memória.
-
-PENSAMENTO:
-
-1) Carregar as transações salvas quando o sistema iniciar.
-2) Criar função para:
-   - Retornar lista atual.
-   - Adicionar nova transação.
-   - (Opcional) remover transação.
-3) Sempre que alterar o estado:
-   - Atualizar o localStorage.
-
-REFLEXÃO:
-- Por que não manipular o localStorage diretamente no UI?
-- O que significa separar responsabilidade?
-
-DESAFIO:
-Como garantir que o array nunca fique fora de sincronia?
-*/
-
-
 import { loadTransactions, saveTransactions } from "./storage.js";
 
 let transactions = loadTransactions();
@@ -29,14 +6,18 @@ export function getTransactions() {
   return transactions;
 }
 
+function makeId() {
+  return String(Date.now()) + "-" + String(Math.floor(Math.random() * 100000));
+}
+
 export function addTransaction({ descricao, valor, tipo, data, categoria }) {
   const transaction = {
-    id: crypto.randomUUID(),
+    id: makeId(),
     descricao,
-    valor,      
+    valor,
     tipo,      
-    data,       
-    categoria,  
+    data,
+    categoria,
   };
 
   transactions = [transaction, ...transactions];
@@ -56,8 +37,9 @@ export function clearAllTransactions() {
 
 export function getTotals() {
   const balance = transactions.reduce((acc, t) => {
-    const signed = t.tipo === "despesa" ? -t.valor : t.valor;
-    return acc + signed;
+    if (t.tipo === "receita") return acc + t.valor;
+    if (t.tipo === "despesa") return acc - t.valor;
+    return acc;
   }, 0);
 
   const income = transactions
@@ -68,9 +50,12 @@ export function getTotals() {
     .filter((t) => t.tipo === "despesa")
     .reduce((acc, t) => acc + t.valor, 0);
 
-  return { balance, income, expense };
-}
+  const savings = transactions
+    .filter((t) => t.tipo === "poupanca")
+    .reduce((acc, t) => acc + t.valor, 0);
 
+  return { balance, income, expense, savings };
+}
 
 export function exportTransactionsJSON() {
   const data = {
@@ -80,7 +65,6 @@ export function exportTransactionsJSON() {
   };
   return JSON.stringify(data, null, 2);
 }
-
 
 export function exportTransactionsCSV() {
   const header = ["id", "descricao", "valor", "tipo", "categoria", "data"];

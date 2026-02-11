@@ -1,4 +1,3 @@
-
 import { getTotals, removeTransaction } from "./state.js";
 
 export const els = {
@@ -14,6 +13,7 @@ export const els = {
   totalBalance: null,
   totalIncome: null,
   totalExpense: null,
+  totalSavings: null,
 
   categoriasBtns: [],
   categoriaSelecionada: "Outros",
@@ -32,25 +32,26 @@ export function initUI() {
   els.totalBalance = document.getElementById("total-balance");
   els.totalIncome = document.getElementById("total-income");
   els.totalExpense = document.getElementById("total-expense");
+  els.totalSavings = document.getElementById("total-savings");
 
   els.categoriasBtns = Array.from(document.querySelectorAll(".categorias"));
-
 
   const missing = [];
   if (!els.descricao) missing.push("#descricao");
   if (!els.quantidade) missing.push("#quantidade");
   if (!els.tipo) missing.push("#tipo-transacao");
   if (!els.btnAdicionar) missing.push(".adiciona-historia");
+  if (!els.btnLimpar) missing.push(".limpar-tudo");
   if (!els.lista) missing.push(".lista-transacoes");
 
-  
   if (!els.totalBalance) missing.push("#total-balance");
   if (!els.totalIncome) missing.push("#total-income");
   if (!els.totalExpense) missing.push("#total-expense");
+  if (!els.totalSavings) missing.push("#total-savings");
 
   if (missing.length > 0) {
-    console.error("❌ Elementos não encontrados no HTML:", missing);
-    alert("A app não iniciou porque faltam IDs/classes no HTML. Abre o Console (F12) e vê a lista.");
+    console.error("Elementos não encontrados no HTML:", missing);
+    alert("Erro: faltam IDs/classes no HTML. Veja o Console (F12).");
     return false;
   }
 
@@ -62,7 +63,6 @@ function formatEUR(value) {
 }
 
 export function setupCategoryButtons() {
-  
   const defaultBtn = els.categoriasBtns.find((b) => b.dataset.category === "Outros");
   if (defaultBtn) defaultBtn.classList.add("is-active");
 
@@ -76,16 +76,44 @@ export function setupCategoryButtons() {
 }
 
 export function renderTotals() {
-  const { balance, income, expense } = getTotals();
+  const { balance, income, expense, savings } = getTotals();
 
   els.totalBalance.textContent = formatEUR(balance);
   els.totalIncome.textContent = formatEUR(income);
   els.totalExpense.textContent = formatEUR(expense);
+  els.totalSavings.textContent = formatEUR(savings);
+
+ 
+  els.totalBalance.classList.remove("positivo", "negativo");
+  els.totalBalance.classList.add(balance < 0 ? "negativo" : "positivo");
+
+  
+  els.totalIncome.classList.add("positivo");
+
+  
+  els.totalSavings.classList.add("neutro");
 }
 
 function createTransactionItem(t, refresh) {
   const isDespesa = t.tipo === "despesa";
-  const valorAssinado = isDespesa ? -t.valor : t.valor;
+  const isReceita = t.tipo === "receita";
+
+  let valorAssinado = t.valor;
+  if (isDespesa) valorAssinado = -t.valor;
+
+  const etiquetaClass = isDespesa
+    ? "etiqueta-despesa"
+    : isReceita
+      ? "etiqueta-receita"
+      : "etiqueta-poupanca";
+
+  const etiquetaTexto = isDespesa
+    ? "DESPESA"
+    : isReceita
+      ? "RECEITA"
+      : "POUPANÇA";
+
+  const valorClass = isDespesa ? "negativo" : "positivo";
 
   const div = document.createElement("div");
   div.className = "item-transacao";
@@ -95,18 +123,16 @@ function createTransactionItem(t, refresh) {
       <div class="caixa-icone"><span class="real-icon">€</span></div>
       <div>
         <div class="nome-transacao">${t.descricao}</div>
-        <span class="etiqueta ${isDespesa ? "etiqueta-despesa" : "etiqueta-receita"}">
-          ${isDespesa ? "DESPESA" : "RECEITA"}
-        </span>
+        <span class="etiqueta ${etiquetaClass}">${etiquetaTexto}</span>
       </div>
     </div>
 
     <div class="data-transacao">${t.categoria || "-"}</div>
     <div class="data-transacao">${t.data}</div>
 
-    <div class="valor-transacao ${isDespesa ? "negativo" : "positivo"}">
+    <div class="valor-transacao ${valorClass}">
       ${formatEUR(valorAssinado)}
-      <button class="btn-remover" type="button" title="Remover">✕</button>
+      <button class="btn-remover" type="button" title="Remover">🗑️</button>
     </div>
   `;
 

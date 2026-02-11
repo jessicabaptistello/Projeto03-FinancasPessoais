@@ -1,4 +1,3 @@
-
 import { els, initUI, renderTotals, renderList, setupCategoryButtons } from "./modulares/userInterface.js";
 import { getTransactions, clearAllTransactions, exportTransactionsJSON, exportTransactionsCSV } from "./modulares/state.js";
 import { submitTransaction } from "./modulares/transactions.js";
@@ -34,60 +33,47 @@ document.addEventListener("DOMContentLoaded", () => {
     calendarioEl.textContent = `Hoje: ${new Date().toLocaleDateString("pt-PT")}`;
   }
 
-
-  const menuItems = document.querySelectorAll(".containers-services");
-  menuItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      menuItems.forEach(i => i.classList.remove("is-active"));
-      item.classList.add("is-active");
-    });
-  });
-
- 
+  
   setupCategoryButtons();
 
- 
+  
   els.btnAdicionar.addEventListener("click", (e) => {
     e.preventDefault();
     submitTransaction(refresh);
   });
 
+  
+  els.btnLimpar.addEventListener("click", () => {
+    const ok = confirm("Tem certeza que deseja excluir todas as transações?");
+    if (!ok) return;
+    clearAllTransactions();
+    refresh();
+  });
 
-  if (els.btnLimpar) {
-    els.btnLimpar.addEventListener("click", () => {
-      const ok = confirm("Tem certeza que deseja apagar todas as transações?");
-      if (!ok) return;
-      clearAllTransactions();
-      refresh();
-    });
-  }
-
-
+  
   const exportBtn = document.querySelector(".exportar");
-  if (exportBtn) {
-    exportBtn.addEventListener("click", () => {
-      const transactions = getTransactions();
-      if (transactions.length === 0) {
-        alert("Não há transações para exportar.");
-        return;
-      }
+  exportBtn.addEventListener("click", () => {
+    const transactions = getTransactions();
+    if (transactions.length === 0) {
+      alert("Não há transações para exportar.");
+      return;
+    }
 
-      const stamp = new Date().toISOString().replaceAll(":", "-").replaceAll(".", "-");
+    const stamp = new Date().toISOString().replaceAll(":", "-").replaceAll(".", "-");
 
-      downloadFile({
-        filename: `minhas-financas-${stamp}.json`,
-        content: exportTransactionsJSON(),
-        mimeType: "application/json;charset=utf-8",
-      });
-
-      downloadFile({
-        filename: `minhas-financas-${stamp}.csv`,
-        content: exportTransactionsCSV(),
-        mimeType: "text/csv;charset=utf-8",
-      });
+    downloadFile({
+      filename: `minhas-financas-${stamp}.json`,
+      content: exportTransactionsJSON(),
+      mimeType: "application/json;charset=utf-8",
     });
-  }
 
+    downloadFile({
+      filename: `minhas-financas-${stamp}.csv`,
+      content: exportTransactionsCSV(),
+      mimeType: "text/csv;charset=utf-8",
+    });
+  });
 
+  
   refresh();
 });
