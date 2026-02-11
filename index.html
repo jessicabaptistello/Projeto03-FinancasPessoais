@@ -3,84 +3,153 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script type="module" src="app.js"></script>
+  <link rel="stylesheet" href="style.css" />
   <title>Finanças Pessoais</title>
-  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="container">
-      <h1 class="brand">Finanças Pessoais</h1>
-      <p class="subtitle">Controle simples de receitas e despesas</p>
+  <aside class="sidebar">
+    <p class="logo">Minhas <span class="financas">Finanças</span></p>
+
+    <menu class="menu">
+      <ul class="lista-de-servicos">
+        <div class="containers-services first is-active">
+          <div class="list-icons"></div>
+          <li class="menu-itens">Dashboard</li>
+        </div>
+
+        <div class="containers-services">
+          <div class="list-icons"></div>
+          <li class="menu-itens">Relatórios</li>
+        </div>
+
+        <div class="containers-services">
+          <div class="list-icons"></div>
+          <li class="menu-itens">Transações</li>
+        </div>
+
+        <div class="containers-services">
+          <div class="list-icons"></div>
+          <li class="menu-itens">Orçamentos</li>
+        </div>
+      </ul>
+    </menu>
+  </aside>
+
+  <header class="header">
+    <div class="titulo-container">
+      <h2 class="titulo">Overview</h2>
+      <p class="subtitle">Bem vinda de volta, vamos organizar suas finanças? </p>
+    </div>
+
+    <div class="header-actions">
+      <div class="calendario">Hoje: --/--/----</div>
+      <button class="exportar" type="button">Exportar</button>
     </div>
   </header>
 
-  <main class="container">
-    <!-- RESUMO -->
-    <section class="grid">
-      <div class="card">
-        <h2 class="card-title">Saldo</h2>
-        <p class="value" id="balance">€ 0,00</p>
-        <p class="hint">Receitas - Despesas</p>
-      </div>
+  <main class="main">
+    <section class="cards">
+      <div class="cards-container">
+        <div class="card">
+          <div class="titulo-card">Balanço Total</div>
+         
+          <div class="valor" id="total-balance">€ 0,00</div>
+          <div class="informacao">Atualiza automaticamente</div>
+        </div>
 
-      <div class="card">
-        <h2 class="card-title">Receitas</h2>
-        <p class="value positive" id="income">€ 0,00</p>
-        <p class="hint">Somatório de entradas</p>
-      </div>
+        <div class="card">
+          <div class="titulo-card">Renda Total</div>
+          <div class="valor" id="total-income">€ 0,00</div>
+          <div class="informacao">Soma das receitas</div>
+        </div>
 
-      <div class="card">
-        <h2 class="card-title">Despesas</h2>
-        <p class="value negative" id="expense">€ 0,00</p>
-        <p class="hint">Somatório de saídas</p>
+        <div class="card">
+          <div class="titulo-card">Total de Despesas</div>
+          <div class="valor expense-color" id="total-expense">€ 0,00</div>
+          <div class="informacao expense-color">Soma das despesas</div>
+        </div>
       </div>
     </section>
 
-    <!-- FORMULÁRIO -->
-    <section class="card">
-      <h2 class="card-title">Novo lançamento</h2>
-
-      <form id="transactionForm" class="form">
-        <div class="field">
-          <label for="desc">Descrição</label>
-          <input id="desc" type="text" placeholder="Ex: Supermercado" required />
+    <section class="transacoes">
+      <div class="nova-transacao">
+        <div class="titulo-nova-transacao-container">
+          <p class="titulo-nova-transacao">Nova Transação</p>
+          <div class="nova-transacao-icon" title="Adicionar">+</div>
         </div>
 
-        <div class="field">
-          <label for="amount">Valor (€)</label>
-          <input id="amount" type="number" step="0.01" placeholder="Ex: 25.90" required />
-          <small class="helper">
-            Use valor positivo para receita e negativo para despesa.
-            Ex: <b>1200</b> (receita) | <b>-50</b> (despesa)
-          </small>
+        <div class="form-container">
+          <div class="description-form">
+            <label for="descricao">Descrição</label>
+            <input type="text" id="descricao" placeholder="ex. Renda mensal" />
+          </div>
+
+          <div class="qtd-tipo-transacao-container">
+            <div class="qtd-container">
+              <label for="quantidade">Valor</label>
+              <input type="number" id="quantidade" placeholder="ex. 1000" />
+            </div>
+
+            <div class="tipo-transacao-container">
+              <label for="tipo-transacao">Tipo</label>
+              <select name="tipo-transacao" id="tipo-transacao">
+                <option value="receita">Receita</option>
+                <option value="despesa">Despesa</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <button class="btn" type="submit">Adicionar</button>
-      </form>
-    </section>
+      
+        <div class="categoria-container">
+          <button class="categorias" type="button" data-category="Comida">Despesas com alimentação</button>
+          <button class="categorias" type="button" data-category="Faturas">Despesas com educação</button>
+          <button class="categorias" type="button" data-category="Salário">Ordenados</button>
+        </div>
 
-    <!-- LISTA -->
-    <section class="card">
-      <div class="row">
-        <h2 class="card-title">Lançamentos</h2>
-        <button id="clearAllBtn" class="btn btn-ghost" type="button">Limpar tudo</button>
+        <div class="categoria-container">
+          <button class="categorias" type="button" data-category="Entretenimento">Despesas com habitação</button>
+          <button class="categorias" type="button" data-category="Lazer">Despesas com saúde</button>
+          <button class="categorias" type="button" data-category="Outros">Outros</button>
+        </div>
+
+        <button class="adiciona-historia" type="button">
+          <div class="btn-container">
+            <div class="btn-icon">+</div>
+            <p class="btn-text">Adicionar ao histórico</p>
+          </div>
+        </button>
       </div>
 
-      <ul id="transactionList" class="list">
-        <!-- itens entram pelo JS -->
-      </ul>
+      <article class="historico">
+     
+        <div class="titulo-historico-container">
+          <h3 class="sub-titulo-historico">Histórico recente</h3>
+          <button class="limpar-tudo" type="button" title="Apagar tudo">Limpar</button>
+        </div>
 
-      <p class="empty" id="emptyState">Ainda não há lançamentos.</p>
+        <div class="table-container">
+          <div class="cabecalho-tabela">
+            <span>TRANSAÇÃO</span>
+            <span>CATEGORIA</span>
+            <span>DATA</span>
+            <span>VALOR</span>
+          </div>
+
+          <div class="lista-transacoes"></div>
+
+          <div class="rodape-tabela">
+            <a href="#" class="link-extrato">VER EXTRATO COMPLETO &rarr;</a>
+          </div>
+        </div>
+      </article>
     </section>
   </main>
 
   <footer class="footer">
-    <div class="container">
-      <p>Feito para aprender HTML, CSS e JS (simples).</p>
-    </div>
+    <p>© 2026 Minhas Finanças. Todos os direitos reservados.</p>
   </footer>
-
-  <script src="app.js"></script>
 </body>
 </html>
