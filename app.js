@@ -1,4 +1,4 @@
-import { els, initUI, renderTotals, renderList, setupCategoryButtons } from "./modulares/userInterface.js";
+import { elements, initUI, renderTotals, renderList, setupCategoryButtons } from "./modulares/userInterface.js";
 import { getTransactions, clearAllTransactions, exportTransactionsJSON, exportTransactionsCSV } from "./modulares/state.js";
 import { submitTransaction } from "./modulares/transactions.js";
 
@@ -37,13 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCategoryButtons();
 
   
-  els.btnAdicionar.addEventListener("click", (e) => {
+  elements.buttonAdicionar.addEventListener("click", (e) => {
     e.preventDefault();
     submitTransaction(refresh);
   });
 
   
-  els.btnLimpar.addEventListener("click", () => {
+  elements.buttonLimpar.addEventListener("click", () => {
     const ok = confirm("Tem certeza que deseja excluir todas as transações?");
     if (!ok) return;
     clearAllTransactions();
@@ -51,8 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   
-  const exportBtn = document.querySelector(".exportar");
-  exportBtn.addEventListener("click", () => {
+  const exportbutton = document.querySelector(".exportar");
+  exportbutton.addEventListener("click", () => {
     const transactions = getTransactions();
     if (transactions.length === 0) {
       alert("Não há transações para exportar.");

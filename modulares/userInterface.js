@@ -1,12 +1,34 @@
+/*
+OBJETIVO:
+Atualizar a interface sempre que o estado mudar.
+
+PENSAMENTO:
+
+1) Selecionar o container da lista.
+2) Limpar o conteúdo antes de renderizar novamente.
+3) Para cada transação:
+   - Criar elemento HTML dinamicamente.
+   - Inserir no DOM.
+4) Atualizar os cards com os valores calculados.
+
+REFLEXÃO:
+- Por que limpar antes de renderizar?
+- O que acontece se não limpar?
+
+DESAFIO:
+Como aplicar classes diferentes para receita e despesa?
+*/
+
+
 import { getTotals, removeTransaction } from "./state.js";
 
-export const els = {
+export const elements = {
   descricao: null,
   quantidade: null,
   tipo: null,
 
-  btnAdicionar: null,
-  btnLimpar: null,
+  buttonAdicionar: null,
+  buttonLimpar: null,
 
   lista: null,
 
@@ -15,39 +37,38 @@ export const els = {
   totalExpense: null,
   totalSavings: null,
 
-  categoriasBtns: [],
+  categoriasbuttons: [],
   categoriaSelecionada: "Outros",
 };
 
 export function initUI() {
-  els.descricao = document.getElementById("descricao");
-  els.quantidade = document.getElementById("quantidade");
-  els.tipo = document.getElementById("tipo-transacao");
+  elements.descricao = document.getElementById("descricao");
+  elements.quantidade = document.getElementById("quantidade");
+  elements.tipo = document.getElementById("tipo-transacao");
 
-  els.btnAdicionar = document.querySelector(".adiciona-historia");
-  els.btnLimpar = document.querySelector(".limpar-tudo");
+  elements.buttonAdicionar = document.querySelector(".adiciona-historia");
+  elements.buttonLimpar = document.querySelector(".limpar-tudo");
 
-  els.lista = document.querySelector(".lista-transacoes");
+  elements.lista = document.querySelector(".lista-transacoes");
 
-  els.totalBalance = document.getElementById("total-balance");
-  els.totalIncome = document.getElementById("total-income");
-  els.totalExpense = document.getElementById("total-expense");
-  els.totalSavings = document.getElementById("total-savings");
+  elements.totalBalance = document.getElementById("total-balance");
+  elements.totalIncome = document.getElementById("total-income");
+  elements.totalExpense = document.getElementById("total-expense");
+  elements.totalSavings = document.getElementById("total-savings");
 
-  els.categoriasBtns = Array.from(document.querySelectorAll(".categorias"));
+  elements.categoriasbuttons = Array.from(document.querySelectorAll(".categorias"));
 
   const missing = [];
-  if (!els.descricao) missing.push("#descricao");
-  if (!els.quantidade) missing.push("#quantidade");
-  if (!els.tipo) missing.push("#tipo-transacao");
-  if (!els.btnAdicionar) missing.push(".adiciona-historia");
-  if (!els.btnLimpar) missing.push(".limpar-tudo");
-  if (!els.lista) missing.push(".lista-transacoes");
+  if (!elements.descricao) missing.push("#descricao");
+  if (!elements.tipo) missing.push("#tipo-transacao");
+  if (!elements.buttonAdicionar) missing.push(".adiciona-historia");
+  if (!elements.buttonLimpar) missing.push(".limpar-tudo");
+  if (!elements.lista) missing.push(".lista-transacoes");
 
-  if (!els.totalBalance) missing.push("#total-balance");
-  if (!els.totalIncome) missing.push("#total-income");
-  if (!els.totalExpense) missing.push("#total-expense");
-  if (!els.totalSavings) missing.push("#total-savings");
+  if (!elements.totalBalance) missing.push("#total-balance");
+  if (!elements.totalIncome) missing.push("#total-income");
+  if (!elements.totalExpense) missing.push("#total-expense");
+  if (!elements.totalSavings) missing.push("#total-savings");
 
   if (missing.length > 0) {
     console.error("Elementos não encontrados no HTML:", missing);
@@ -63,14 +84,14 @@ function formatEUR(value) {
 }
 
 export function setupCategoryButtons() {
-  const defaultBtn = els.categoriasBtns.find((b) => b.dataset.category === "Outros");
-  if (defaultBtn) defaultBtn.classList.add("is-active");
+  const defaultbutton = elements.categoriasbuttons.find((b) => b.dataset.category === "Outros");
+  if (defaultbutton) defaultbutton.classList.add("is-active");
 
-  els.categoriasBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      els.categoriasBtns.forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      els.categoriaSelecionada = btn.dataset.category || "Outros";
+  elements.categoriasbuttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      elements.categoriasbuttons.forEach((b) => b.classList.remove("is-active"));
+      button.classList.add("is-active");
+      elements.categoriaSelecionada = button.dataset.category || "Outros";
     });
   });
 }
@@ -78,20 +99,20 @@ export function setupCategoryButtons() {
 export function renderTotals() {
   const { balance, income, expense, savings } = getTotals();
 
-  els.totalBalance.textContent = formatEUR(balance);
-  els.totalIncome.textContent = formatEUR(income);
-  els.totalExpense.textContent = formatEUR(expense);
-  els.totalSavings.textContent = formatEUR(savings);
+ elements.totalBalance.textContent = formatEUR(balance);
+ elements.totalIncome.textContent = formatEUR(income);
+ elements.totalExpense.textContent = formatEUR(expense);
+ elements.totalSavings.textContent = formatEUR(savings);
 
  
-  els.totalBalance.classList.remove("positivo", "negativo");
-  els.totalBalance.classList.add(balance < 0 ? "negativo" : "positivo");
+  elements.totalBalance.classList.remove("positivo", "negativo");
+  elements.totalBalance.classList.add(balance < 0 ? "negativo" : "positivo");
 
   
-  els.totalIncome.classList.add("positivo");
+  elements.totalIncome.classList.add("positivo");
 
   
-  els.totalSavings.classList.add("neutro");
+  elements.totalSavings.classList.add("neutro");
 }
 
 function createTransactionItem(t, refresh) {
@@ -132,11 +153,11 @@ function createTransactionItem(t, refresh) {
 
     <div class="valor-transacao ${valorClass}">
       ${formatEUR(valorAssinado)}
-      <button class="btn-remover" type="button" title="Remover">🗑️</button>
+      <button class="button-remover" type="button" title="Remover">🗑️</button>
     </div>
   `;
 
-  div.querySelector(".btn-remover").addEventListener("click", () => {
+  div.querySelector(".button-remover").addEventListener("click", () => {
     removeTransaction(t.id);
     refresh();
   });
@@ -145,8 +166,8 @@ function createTransactionItem(t, refresh) {
 }
 
 export function renderList(transactions, refresh) {
-  els.lista.innerHTML = "";
+  elements.lista.innerHTML = "";
   transactions.forEach((t) => {
-    els.lista.appendChild(createTransactionItem(t, refresh));
+    elements.lista.appendChild(createTransactionItem(t, refresh));
   });
 }
