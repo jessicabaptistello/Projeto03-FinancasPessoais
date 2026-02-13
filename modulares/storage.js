@@ -4,7 +4,7 @@
   NOTA: localStorage guarda apenas strings → usamos JSON.
 */
 
-const KEY = "transactions_v1";
+const KEY = "historico";
 
 export function loadTransactions() {
   const raw = localStorage.getItem(KEY);
