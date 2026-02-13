@@ -1,49 +1,27 @@
 /*
-OBJETIVO:
-Calcular saldo total, total de receitas e total de despesas.
-
-PENSAMENTO:
-
-1) O saldo começa em 0.
-2) Para cada transação:
-   - Se for receita, soma.
-   - Se for despesa, subtrai.
-3) Para calcular totais separados:
-   - Filtrar por tipo.
-   - Somar valores.
-
-DICA IMPORTANTE:
-Use reduce().
-
-Pergunta:
-- O que é o acumulador?
-- Qual deve ser o valor inicial?
-
-Exemplo mental:
-[100, -50, 200]
-Resultado esperado: 250
-
-Não escreva loops tradicionais.
+  transactions.js
+  OBJETIVO: ler o formulário, validar e criar uma nova transação.
+  - Não calcula totais (isso é do state.js)
+  - Só pega dados do UI e chama addTransaction()
 */
-
 
 import { elements } from "./userInterface.js";
 import { addTransaction } from "./state.js";
 
-function makeDate() {
+function todayPT() {
   return new Date().toLocaleDateString("pt-PT");
 }
 
-function getFormData() {
+function readForm() {
   return {
     descricao: elements.descricao.value.trim(),
     valor: Number(elements.quantidade.value),
-    tipo: elements.tipo.value, 
+    tipo: elements.tipo.value,
     categoria: elements.categoriaSelecionada || "Outros",
   };
 }
 
-function validate(data) {
+function isValid(data) {
   if (!data.descricao) {
     alert("Preencha a descrição.");
     return false;
@@ -70,15 +48,15 @@ function clearForm() {
 }
 
 export function submitTransaction(refresh) {
-  const data = getFormData();
-  if (!validate(data)) return;
+  const data = readForm();
+  if (!isValid(data)) return;
 
   addTransaction({
     descricao: data.descricao,
     valor: data.valor,
     tipo: data.tipo,
     categoria: data.categoria,
-    data: makeDate(),
+    data: todayPT(),
   });
 
   clearForm();

@@ -1,5 +1,18 @@
-import { elements, initUI, renderTotals, renderList, setupCategoryButtons } from "./modulares/userInterface.js";
-import { getTransactions, clearAllTransactions, exportTransactionsJSON, exportTransactionsCSV } from "./modulares/state.js";
+import {
+  elements,
+  initUI,
+  renderTotals,
+  renderList,
+  setupCategoryButtons,
+} from "./modulares/userInterface.js";
+
+import {
+  getTransactions,
+  clearAllTransactions,
+  exportTransactionsJSON,
+  exportTransactionsCSV,
+} from "./modulares/state.js";
+
 import { submitTransaction } from "./modulares/transactions.js";
 
 function refresh() {
@@ -22,36 +35,33 @@ function downloadFile({ filename, content, mimeType }) {
   URL.revokeObjectURL(url);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  
-  const ok = initUI();
-  if (!ok) return;
-
-  
+function setupCalendar() {
   const calendarioEl = document.querySelector(".calendario");
-  if (calendarioEl) {
-    calendarioEl.textContent = `Hoje: ${new Date().toLocaleDateString("pt-PT")}`;
-  }
+  if (!calendarioEl) return;
 
-  
-  setupCategoryButtons();
+  calendarioEl.textContent = `Hoje: ${new Date().toLocaleDateString("pt-PT")}`;
+}
 
-  
+function setupButtons() {
+  // Adicionar
   elements.buttonAdicionar.addEventListener("click", (e) => {
     e.preventDefault();
     submitTransaction(refresh);
   });
 
-  
+  // Limpar
   elements.buttonLimpar.addEventListener("click", () => {
     const ok = confirm("Tem certeza que deseja excluir todas as transações?");
     if (!ok) return;
+
     clearAllTransactions();
     refresh();
   });
 
-  
+  // Exportar (proteção se o botão não existir)
   const exportbutton = document.querySelector(".exportar");
+  if (!exportbutton) return;
+
   exportbutton.addEventListener("click", () => {
     const transactions = getTransactions();
     if (transactions.length === 0) {
@@ -73,7 +83,15 @@ document.addEventListener("DOMContentLoaded", () => {
       mimeType: "text/csv;charset=utf-8",
     });
   });
+}
 
-  
+document.addEventListener("DOMContentLoaded", () => {
+  const ok = initUI();
+  if (!ok) return;
+
+  setupCalendar();
+  setupCategoryButtons();
+  setupButtons();
+
   refresh();
 });

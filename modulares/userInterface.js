@@ -1,24 +1,10 @@
 /*
-OBJETIVO:
-Atualizar a interface sempre que o estado mudar.
-
-PENSAMENTO:
-
-1) Selecionar o container da lista.
-2) Limpar o conteúdo antes de renderizar novamente.
-3) Para cada transação:
-   - Criar elemento HTML dinamicamente.
-   - Inserir no DOM.
-4) Atualizar os cards com os valores calculados.
-
-REFLEXÃO:
-- Por que limpar antes de renderizar?
-- O que acontece se não limpar?
-
-DESAFIO:
-Como aplicar classes diferentes para receita e despesa?
+  userInterface.js
+  OBJETIVO: lidar com o DOM (tela).
+  - selecionar elementos (initUI)
+  - configurar botões (setupCategoryButtons)
+  - renderizar totais e lista (renderTotals / renderList)
 */
-
 
 import { getTotals, removeTransaction } from "./state.js";
 
@@ -41,28 +27,45 @@ export const elements = {
   categoriaSelecionada: "Outros",
 };
 
+function $(selector) {
+  return document.querySelector(selector);
+}
+
+function byId(id) {
+  return document.getElementById(id);
+}
+
 export function initUI() {
-  elements.descricao = document.getElementById("descricao");
-  elements.quantidade = document.getElementById("quantidade");
-  elements.tipo = document.getElementById("tipo-transacao");
+  // Inputs
+  elements.descricao = byId("descricao");
+  elements.quantidade = byId("quantidade");
+  elements.tipo = byId("tipo-transacao");
 
-  elements.buttonAdicionar = document.querySelector(".adiciona-historia");
-  elements.buttonLimpar = document.querySelector(".limpar-tudo");
+  // Botões
+  elements.buttonAdicionar = $(".adiciona-historia");
+  elements.buttonLimpar = $(".limpar-tudo");
 
-  elements.lista = document.querySelector(".lista-transacoes");
+  // Lista
+  elements.lista = $(".lista-transacoes");
 
-  elements.totalBalance = document.getElementById("total-balance");
-  elements.totalIncome = document.getElementById("total-income");
-  elements.totalExpense = document.getElementById("total-expense");
-  elements.totalSavings = document.getElementById("total-savings");
+  // Totais
+  elements.totalBalance = byId("total-balance");
+  elements.totalIncome = byId("total-income");
+  elements.totalExpense = byId("total-expense");
+  elements.totalSavings = byId("total-savings");
 
+  // Categorias
   elements.categoriasbuttons = Array.from(document.querySelectorAll(".categorias"));
 
+  // Verificação simples (iniciante-friendly)
   const missing = [];
   if (!elements.descricao) missing.push("#descricao");
+  if (!elements.quantidade) missing.push("#quantidade");
   if (!elements.tipo) missing.push("#tipo-transacao");
+
   if (!elements.buttonAdicionar) missing.push(".adiciona-historia");
   if (!elements.buttonLimpar) missing.push(".limpar-tudo");
+
   if (!elements.lista) missing.push(".lista-transacoes");
 
   if (!elements.totalBalance) missing.push("#total-balance");
@@ -83,56 +86,60 @@ function formatEUR(value) {
   return value.toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
 }
 
-export function setupCategoryButtons() {
-  const defaultbutton = elements.categoriasbuttons.find((b) => b.dataset.category === "Outros");
-  if (defaultbutton) defaultbutton.classList.add("is-active");
+function setStatusClass(el, status) {
+  // status: "positivo" | "negativo" | "neutro"
+  el.classList.remove("positivo", "negativo", "neutro");
+  el.classList.add(status);
+}
 
-  elements.categoriasbuttons.forEach((button) => {
+export function setupCategoryButtons() {
+  // Marca "Outros" como ativo no início (se existir)
+  const defaultBtn = elements.categoriasbuttons.find(
+    (b) => b.dataset.category === "Outros"
+  );
+  if (defaultBtn) defaultBtn.classList.add("is-active");
+
+  for (const button of elements.categoriasbuttons) {
     button.addEventListener("click", () => {
-      elements.categoriasbuttons.forEach((b) => b.classList.remove("is-active"));
+      // tira ativo de todos
+      for (const b of elements.categoriasbuttons) b.classList.remove("is-active");
+
+      // marca o clicado
       button.classList.add("is-active");
+
+      // guarda categoria selecionada
       elements.categoriaSelecionada = button.dataset.category || "Outros";
     });
-  });
+  }
 }
 
 export function renderTotals() {
   const { balance, income, expense, savings } = getTotals();
 
- elements.totalBalance.textContent = formatEUR(balance);
- elements.totalIncome.textContent = formatEUR(income);
- elements.totalExpense.textContent = formatEUR(expense);
- elements.totalSavings.textContent = formatEUR(savings);
+  elements.totalBalance.textContent = formatEUR(balance);
+  elements.totalIncome.textContent = formatEUR(income);
+  elements.totalExpense.textContent = formatEUR(expense);
+  elements.totalSavings.textContent = formatEUR(savings);
 
- 
-  elements.totalBalance.classList.remove("positivo", "negativo");
-  elements.totalBalance.classList.add(balance < 0 ? "negativo" : "positivo");
-
-  
-  elements.totalIncome.classList.add("positivo");
-
-  
-  elements.totalSavings.classList.add("neutro");
+  setStatusClass(elements.totalBalance, balance < 0 ? "negativo" : "positivo");
+  setStatusClass(elements.totalIncome, "positivo");
+  setStatusClass(elements.totalExpense, "negativo");
+  setStatusClass(elements.totalSavings, "neutro");
 }
 
 function createTransactionItem(t, refresh) {
   const isDespesa = t.tipo === "despesa";
   const isReceita = t.tipo === "receita";
 
-  let valorAssinado = t.valor;
-  if (isDespesa) valorAssinado = -t.valor;
+  const valorAssinado = isDespesa ? -t.valor : t.valor;
 
   const etiquetaClass = isDespesa
     ? "etiqueta-despesa"
     : isReceita
-      ? "etiqueta-receita"
-      : "etiqueta-poupanca";
+    ? "etiqueta-receita"
+    : "etiqueta-poupanca";
 
-  const etiquetaTexto = isDespesa
-    ? "DESPESA"
-    : isReceita
-      ? "RECEITA"
-      : "POUPANÇA";
+  const etiquetaTexto = isDespesa ? "DESPESA" : isReceita ? "RECEITA" : "POUPANÇA";
 
   const valorClass = isDespesa ? "negativo" : "positivo";
 
@@ -157,7 +164,8 @@ function createTransactionItem(t, refresh) {
     </div>
   `;
 
-  div.querySelector(".button-remover").addEventListener("click", () => {
+  const btnRemove = div.querySelector(".button-remover");
+  btnRemove.addEventListener("click", () => {
     removeTransaction(t.id);
     refresh();
   });
@@ -167,7 +175,8 @@ function createTransactionItem(t, refresh) {
 
 export function renderList(transactions, refresh) {
   elements.lista.innerHTML = "";
-  transactions.forEach((t) => {
+
+  for (const t of transactions) {
     elements.lista.appendChild(createTransactionItem(t, refresh));
-  });
+  }
 }
