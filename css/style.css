@@ -174,19 +174,6 @@
   margin-top: 16px;
 }
 
-.link-extrato {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.link-extrato:hover {
-  color: var(--text);
-}
-
-
 .footer {
   grid-area: footer;
   background: transparent;
