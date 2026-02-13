@@ -56,7 +56,7 @@ function setupButtons() {
   });
 
   const exportbutton = document.querySelector(".exportar");
-  if (!exportbutton) return; // ✅ CORRIGIDO: proteção
+  if (!exportbutton) return; 
 
   exportbutton.addEventListener("click", () => {
     const transactions = getTransactions();
