@@ -1,11 +1,12 @@
-const KEY = "transactions_v1";
+const KEY = "transactions_v1"; 
 
 export function loadTransactions() {
   const raw = localStorage.getItem(KEY);
   if (!raw) return [];
 
   try {
-    return JSON.parse(raw);
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : []; 
   } catch {
     return [];
   }

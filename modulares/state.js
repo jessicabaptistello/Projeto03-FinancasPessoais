@@ -1,13 +1,19 @@
+
+
 import { loadTransactions, saveTransactions } from "./storage.js";
 
 let transactions = loadTransactions();
 
 export function getTransactions() {
-  return transactions;
+  return [...transactions]; 
 }
 
 function makeId() {
-  return String(Date.now()) + "-" + String(Math.floor(Math.random() * 100000));
+  return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+}
+
+function persist() {
+  saveTransactions(transactions);
 }
 
 export function addTransaction({ descricao, valor, tipo, data, categoria }) {
@@ -15,44 +21,42 @@ export function addTransaction({ descricao, valor, tipo, data, categoria }) {
     id: makeId(),
     descricao,
     valor,
-    tipo,      
+    tipo,
     data,
     categoria,
   };
 
   transactions = [transaction, ...transactions];
-  saveTransactions(transactions);
+  persist();
 }
 
 export function removeTransaction(id) {
   transactions = transactions.filter((t) => t.id !== id);
-  saveTransactions(transactions);
+  persist();
 }
 
 export function clearAllTransactions() {
   transactions = [];
-  saveTransactions(transactions);
+  persist();
 }
 
-
 export function getTotals() {
-  const balance = transactions.reduce((acc, t) => {
-    if (t.tipo === "receita") return acc + t.valor;
-    if (t.tipo === "despesa") return acc - t.valor;
-    return acc;
-  }, 0);
+  let balance = 0;
+  let income = 0;
+  let expense = 0;
+  let savings = 0;
 
-  const income = transactions
-    .filter((t) => t.tipo === "receita")
-    .reduce((acc, t) => acc + t.valor, 0);
-
-  const expense = transactions
-    .filter((t) => t.tipo === "despesa")
-    .reduce((acc, t) => acc + t.valor, 0);
-
-  const savings = transactions
-    .filter((t) => t.tipo === "poupanca")
-    .reduce((acc, t) => acc + t.valor, 0);
+  for (const t of transactions) {
+    if (t.tipo === "receita") {
+      income += t.valor;
+      balance += t.valor;
+    } else if (t.tipo === "despesa") {
+      expense += t.valor;
+      balance -= t.valor;
+    } else if (t.tipo === "poupanca") {
+      savings += t.valor;
+    }
+  }
 
   return { balance, income, expense, savings };
 }
@@ -69,22 +73,23 @@ export function exportTransactionsJSON() {
 export function exportTransactionsCSV() {
   const header = ["id", "descricao", "valor", "tipo", "categoria", "data"];
 
-  const escapeCSV = (v) => {
-    const s = String(v ?? "");
+  function escapeCSV(value) {
+    const s = String(value ?? "");
     if (s.includes(",") || s.includes('"') || s.includes("\n")) {
       return `"${s.replaceAll('"', '""')}"`;
     }
     return s;
-  };
+  }
 
-  const lines = [
-    header.join(","),
-    ...transactions.map((t) =>
-      [t.id, t.descricao, t.valor, t.tipo, t.categoria, t.data]
-        .map(escapeCSV)
-        .join(",")
-    ),
-  ];
+  const lines = [header.join(",")];
+
+  for (const t of transactions) {
+    const row = [t.id, t.descricao, t.valor, t.tipo, t.categoria, t.data]
+      .map(escapeCSV)
+      .join(",");
+    lines.push(row);
+  }
 
   return lines.join("\n");
 }
+

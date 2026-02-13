@@ -1,12 +1,12 @@
 import { getTotals, removeTransaction } from "./state.js";
 
-export const els = {
+export const elements = {
   descricao: null,
   quantidade: null,
   tipo: null,
 
-  btnAdicionar: null,
-  btnLimpar: null,
+  buttonAdicionar: null,
+  buttonLimpar: null,
 
   lista: null,
 
@@ -15,39 +15,49 @@ export const els = {
   totalExpense: null,
   totalSavings: null,
 
-  categoriasBtns: [],
+  categoriasbuttons: [],
   categoriaSelecionada: "Outros",
 };
 
+function $(selector) {
+  return document.querySelector(selector);
+}
+
+function byId(id) {
+  return document.getElementById(id);
+}
+
 export function initUI() {
-  els.descricao = document.getElementById("descricao");
-  els.quantidade = document.getElementById("quantidade");
-  els.tipo = document.getElementById("tipo-transacao");
+  elements.descricao = byId("descricao");
+  elements.quantidade = byId("quantidade");
+  elements.tipo = byId("tipo-transacao");
 
-  els.btnAdicionar = document.querySelector(".adiciona-historia");
-  els.btnLimpar = document.querySelector(".limpar-tudo");
+  elements.buttonAdicionar = $(".adiciona-historia");
+  elements.buttonLimpar = $(".limpar-tudo");
 
-  els.lista = document.querySelector(".lista-transacoes");
+  elements.lista = $(".lista-transacoes");
 
-  els.totalBalance = document.getElementById("total-balance");
-  els.totalIncome = document.getElementById("total-income");
-  els.totalExpense = document.getElementById("total-expense");
-  els.totalSavings = document.getElementById("total-savings");
+  elements.totalBalance = byId("total-balance");
+  elements.totalIncome = byId("total-income");
+  elements.totalExpense = byId("total-expense");
+  elements.totalSavings = byId("total-savings");
 
-  els.categoriasBtns = Array.from(document.querySelectorAll(".categorias"));
+  elements.categoriasbuttons = Array.from(document.querySelectorAll(".categorias"));
 
   const missing = [];
-  if (!els.descricao) missing.push("#descricao");
-  if (!els.quantidade) missing.push("#quantidade");
-  if (!els.tipo) missing.push("#tipo-transacao");
-  if (!els.btnAdicionar) missing.push(".adiciona-historia");
-  if (!els.btnLimpar) missing.push(".limpar-tudo");
-  if (!els.lista) missing.push(".lista-transacoes");
+  if (!elements.descricao) missing.push("#descricao");
+  if (!elements.quantidade) missing.push("#quantidade");
+  if (!elements.tipo) missing.push("#tipo-transacao");
 
-  if (!els.totalBalance) missing.push("#total-balance");
-  if (!els.totalIncome) missing.push("#total-income");
-  if (!els.totalExpense) missing.push("#total-expense");
-  if (!els.totalSavings) missing.push("#total-savings");
+  if (!elements.buttonAdicionar) missing.push(".adiciona-historia");
+  if (!elements.buttonLimpar) missing.push(".limpar-tudo");
+
+  if (!elements.lista) missing.push(".lista-transacoes");
+
+  if (!elements.totalBalance) missing.push("#total-balance");
+  if (!elements.totalIncome) missing.push("#total-income");
+  if (!elements.totalExpense) missing.push("#total-expense");
+  if (!elements.totalSavings) missing.push("#total-savings");
 
   if (missing.length > 0) {
     console.error("Elementos não encontrados no HTML:", missing);
@@ -62,58 +72,56 @@ function formatEUR(value) {
   return value.toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
 }
 
+function setStatusClass(el, status) {
+  el.classList.remove("positivo", "negativo", "neutro");
+  el.classList.add(status);
+}
+
 export function setupCategoryButtons() {
-  const defaultBtn = els.categoriasBtns.find((b) => b.dataset.category === "Outros");
+  const defaultBtn = elements.categoriasbuttons.find(
+    (b) => b.dataset.category === "Outros"
+  );
   if (defaultBtn) defaultBtn.classList.add("is-active");
 
-  els.categoriasBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      els.categoriasBtns.forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      els.categoriaSelecionada = btn.dataset.category || "Outros";
+  for (const button of elements.categoriasbuttons) {
+    button.addEventListener("click", () => {
+      for (const b of elements.categoriasbuttons) b.classList.remove("is-active");
+      button.classList.add("is-active");
+      elements.categoriaSelecionada = button.dataset.category || "Outros";
     });
-  });
+  }
 }
 
 export function renderTotals() {
   const { balance, income, expense, savings } = getTotals();
 
-  els.totalBalance.textContent = formatEUR(balance);
-  els.totalIncome.textContent = formatEUR(income);
-  els.totalExpense.textContent = formatEUR(expense);
-  els.totalSavings.textContent = formatEUR(savings);
+  elements.totalBalance.textContent = formatEUR(balance);
+  elements.totalIncome.textContent = formatEUR(income);
+  elements.totalExpense.textContent = formatEUR(expense);
+  elements.totalSavings.textContent = formatEUR(savings);
 
- 
-  els.totalBalance.classList.remove("positivo", "negativo");
-  els.totalBalance.classList.add(balance < 0 ? "negativo" : "positivo");
-
-  
-  els.totalIncome.classList.add("positivo");
-
-  
-  els.totalSavings.classList.add("neutro");
+  setStatusClass(elements.totalBalance, balance < 0 ? "negativo" : "positivo");
+  setStatusClass(elements.totalIncome, "positivo");
+  setStatusClass(elements.totalExpense, "negativo");
+  setStatusClass(elements.totalSavings, "neutro");
 }
 
 function createTransactionItem(t, refresh) {
   const isDespesa = t.tipo === "despesa";
   const isReceita = t.tipo === "receita";
+  const isPoupanca = t.tipo === "poupanca"; 
 
-  let valorAssinado = t.valor;
-  if (isDespesa) valorAssinado = -t.valor;
+  const valorAssinado = isDespesa ? -t.valor : t.valor;
 
   const etiquetaClass = isDespesa
     ? "etiqueta-despesa"
     : isReceita
-      ? "etiqueta-receita"
-      : "etiqueta-poupanca";
+    ? "etiqueta-receita"
+    : "etiqueta-poupanca";
 
-  const etiquetaTexto = isDespesa
-    ? "DESPESA"
-    : isReceita
-      ? "RECEITA"
-      : "POUPANÇA";
+  const etiquetaTexto = isDespesa ? "DESPESA" : isReceita ? "RECEITA" : "POUPANÇA";
 
-  const valorClass = isDespesa ? "negativo" : "positivo";
+  const valorClass = isDespesa ? "negativo" : isPoupanca ? "neutro" : "positivo";
 
   const div = document.createElement("div");
   div.className = "item-transacao";
@@ -132,11 +140,12 @@ function createTransactionItem(t, refresh) {
 
     <div class="valor-transacao ${valorClass}">
       ${formatEUR(valorAssinado)}
-      <button class="btn-remover" type="button" title="Remover">🗑️</button>
+      <button class="button-remover" type="button" title="Remover">🗑️</button>
     </div>
   `;
 
-  div.querySelector(".btn-remover").addEventListener("click", () => {
+  const btnRemove = div.querySelector(".button-remover");
+  btnRemove.addEventListener("click", () => {
     removeTransaction(t.id);
     refresh();
   });
@@ -145,8 +154,9 @@ function createTransactionItem(t, refresh) {
 }
 
 export function renderList(transactions, refresh) {
-  els.lista.innerHTML = "";
-  transactions.forEach((t) => {
-    els.lista.appendChild(createTransactionItem(t, refresh));
-  });
+  elements.lista.innerHTML = "";
+
+  for (const t of transactions) {
+    elements.lista.appendChild(createTransactionItem(t, refresh));
+  }
 }

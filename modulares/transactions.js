@@ -1,20 +1,20 @@
-import { els } from "./userInterface.js";
+import { elements } from "./userInterface.js";
 import { addTransaction } from "./state.js";
 
-function makeDate() {
+function todayPT() {
   return new Date().toLocaleDateString("pt-PT");
 }
 
-function getFormData() {
+function readForm() {
   return {
-    descricao: els.descricao.value.trim(),
-    valor: Number(els.quantidade.value),
-    tipo: els.tipo.value, 
-    categoria: els.categoriaSelecionada || "Outros",
+    descricao: elements.descricao.value.trim(),
+    valor: Number(elements.quantidade.value),
+    tipo: elements.tipo.value,
+    categoria: elements.categoriaSelecionada || "Outros",
   };
 }
 
-function validate(data) {
+function isValid(data) {
   if (!data.descricao) {
     alert("Preencha a descrição.");
     return false;
@@ -35,21 +35,21 @@ function validate(data) {
 }
 
 function clearForm() {
-  els.descricao.value = "";
-  els.quantidade.value = "";
-  els.tipo.value = "receita";
+  elements.descricao.value = "";
+  elements.quantidade.value = "";
+  elements.tipo.value = "receita";
 }
 
 export function submitTransaction(refresh) {
-  const data = getFormData();
-  if (!validate(data)) return;
+  const data = readForm();
+  if (!isValid(data)) return;
 
   addTransaction({
     descricao: data.descricao,
     valor: data.valor,
     tipo: data.tipo,
     categoria: data.categoria,
-    data: makeDate(),
+    data: todayPT(),
   });
 
   clearForm();
