@@ -1,22 +1,11 @@
-/*
-  state.js
-  OBJETIVO: ser o "cérebro" das transações (estado).
-  - Guarda em memória
-  - Sincroniza com localStorage
-  - Calcula totais
-*/
+
 
 import { loadTransactions, saveTransactions } from "./storage.js";
 
 let transactions = loadTransactions();
 
-/*
-  IMPORTANTE:
-  Devolve uma cópia do array, para ninguém conseguir alterar o array interno
-  sem passar pelas funções (add/remove/clear).
-*/
 export function getTransactions() {
-  return [...transactions];
+  return [...transactions]; 
 }
 
 function makeId() {
@@ -52,7 +41,6 @@ export function clearAllTransactions() {
 }
 
 export function getTotals() {
-  // Mantive a tua lógica: "poupanca" não entra no balanço
   let balance = 0;
   let income = 0;
   let expense = 0;
@@ -104,3 +92,4 @@ export function exportTransactionsCSV() {
 
   return lines.join("\n");
 }
+

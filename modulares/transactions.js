@@ -1,10 +1,3 @@
-/*
-  transactions.js
-  OBJETIVO: ler o formulário, validar e criar uma nova transação.
-  - Não calcula totais (isso é do state.js)
-  - Só pega dados do UI e chama addTransaction()
-*/
-
 import { elements } from "./userInterface.js";
 import { addTransaction } from "./state.js";
 

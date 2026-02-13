@@ -1,10 +1,4 @@
-/*
-  storage.js
-  OBJETIVO: guardar e recuperar transações no localStorage.
-  NOTA: localStorage guarda apenas strings → usamos JSON.
-*/
-
-const KEY = "historico";
+const KEY = "transactions_v1"; 
 
 export function loadTransactions() {
   const raw = localStorage.getItem(KEY);
@@ -12,10 +6,8 @@ export function loadTransactions() {
 
   try {
     const data = JSON.parse(raw);
-    // Garantia extra: só aceitamos array
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    // Se o JSON estiver inválido/corrompido, não quebra a app
+    return Array.isArray(data) ? data : []; 
+  } catch {
     return [];
   }
 }

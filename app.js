@@ -38,18 +38,15 @@ function downloadFile({ filename, content, mimeType }) {
 function setupCalendar() {
   const calendarioEl = document.querySelector(".calendario");
   if (!calendarioEl) return;
-
   calendarioEl.textContent = `Hoje: ${new Date().toLocaleDateString("pt-PT")}`;
 }
 
 function setupButtons() {
-  // Adicionar
   elements.buttonAdicionar.addEventListener("click", (e) => {
     e.preventDefault();
     submitTransaction(refresh);
   });
 
-  // Limpar
   elements.buttonLimpar.addEventListener("click", () => {
     const ok = confirm("Tem certeza que deseja excluir todas as transações?");
     if (!ok) return;
@@ -58,9 +55,8 @@ function setupButtons() {
     refresh();
   });
 
-  // Exportar (proteção se o botão não existir)
   const exportbutton = document.querySelector(".exportar");
-  if (!exportbutton) return;
+  if (!exportbutton) return; // ✅ CORRIGIDO: proteção
 
   exportbutton.addEventListener("click", () => {
     const transactions = getTransactions();
@@ -92,6 +88,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCalendar();
   setupCategoryButtons();
   setupButtons();
-
   refresh();
 });

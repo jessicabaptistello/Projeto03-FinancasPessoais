@@ -1,11 +1,3 @@
-/*
-  userInterface.js
-  OBJETIVO: lidar com o DOM (tela).
-  - selecionar elementos (initUI)
-  - configurar botões (setupCategoryButtons)
-  - renderizar totais e lista (renderTotals / renderList)
-*/
-
 import { getTotals, removeTransaction } from "./state.js";
 
 export const elements = {
@@ -36,28 +28,22 @@ function byId(id) {
 }
 
 export function initUI() {
-  // Inputs
   elements.descricao = byId("descricao");
   elements.quantidade = byId("quantidade");
   elements.tipo = byId("tipo-transacao");
 
-  // Botões
   elements.buttonAdicionar = $(".adiciona-historia");
   elements.buttonLimpar = $(".limpar-tudo");
 
-  // Lista
   elements.lista = $(".lista-transacoes");
 
-  // Totais
   elements.totalBalance = byId("total-balance");
   elements.totalIncome = byId("total-income");
   elements.totalExpense = byId("total-expense");
   elements.totalSavings = byId("total-savings");
 
-  // Categorias
   elements.categoriasbuttons = Array.from(document.querySelectorAll(".categorias"));
 
-  // Verificação simples (iniciante-friendly)
   const missing = [];
   if (!elements.descricao) missing.push("#descricao");
   if (!elements.quantidade) missing.push("#quantidade");
@@ -87,13 +73,11 @@ function formatEUR(value) {
 }
 
 function setStatusClass(el, status) {
-  // status: "positivo" | "negativo" | "neutro"
   el.classList.remove("positivo", "negativo", "neutro");
   el.classList.add(status);
 }
 
 export function setupCategoryButtons() {
-  // Marca "Outros" como ativo no início (se existir)
   const defaultBtn = elements.categoriasbuttons.find(
     (b) => b.dataset.category === "Outros"
   );
@@ -101,13 +85,8 @@ export function setupCategoryButtons() {
 
   for (const button of elements.categoriasbuttons) {
     button.addEventListener("click", () => {
-      // tira ativo de todos
       for (const b of elements.categoriasbuttons) b.classList.remove("is-active");
-
-      // marca o clicado
       button.classList.add("is-active");
-
-      // guarda categoria selecionada
       elements.categoriaSelecionada = button.dataset.category || "Outros";
     });
   }
@@ -130,6 +109,7 @@ export function renderTotals() {
 function createTransactionItem(t, refresh) {
   const isDespesa = t.tipo === "despesa";
   const isReceita = t.tipo === "receita";
+  const isPoupanca = t.tipo === "poupanca"; 
 
   const valorAssinado = isDespesa ? -t.valor : t.valor;
 
@@ -141,7 +121,7 @@ function createTransactionItem(t, refresh) {
 
   const etiquetaTexto = isDespesa ? "DESPESA" : isReceita ? "RECEITA" : "POUPANÇA";
 
-  const valorClass = isDespesa ? "negativo" : "positivo";
+  const valorClass = isDespesa ? "negativo" : isPoupanca ? "neutro" : "positivo";
 
   const div = document.createElement("div");
   div.className = "item-transacao";
