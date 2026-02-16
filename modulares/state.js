@@ -1,19 +1,18 @@
-
-
 import { loadTransactions, saveTransactions } from "./storage.js";
 
 let transactions = loadTransactions();
 
-export function getTransactions() {
-  return [...transactions]; 
-}
 
-function makeId() {
-  return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+export function getTransactions() {
+  return [...transactions];
 }
 
 function persist() {
   saveTransactions(transactions);
+}
+
+function makeId() {
+  return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 }
 
 export function addTransaction({ descricao, valor, tipo, data, categoria }) {
@@ -40,26 +39,35 @@ export function clearAllTransactions() {
   persist();
 }
 
-export function getTotals() {
-  let balance = 0;
-  let income = 0;
-  let expense = 0;
-  let savings = 0;
 
-  for (const t of transactions) {
-    if (t.tipo === "receita") {
-      income += t.valor;
-      balance += t.valor;
-    } else if (t.tipo === "despesa") {
-      expense += t.valor;
-      balance -= t.valor;
-    } else if (t.tipo === "poupanca") {
-      savings += t.valor;
-    }
-  }
-
-  return { balance, income, expense, savings };
+export function updateTransaction(id, updatedFields) {
+  transactions = transactions.map((t) => {
+    if (t.id !== id) return t;
+    return { ...t, ...updatedFields };
+  });
+  persist();
 }
+
+export function getTotals() {
+  const totals = transactions.reduce(
+    (acc, t) => {
+      if (t.tipo === "receita") {
+        acc.income += t.valor;
+        acc.balance += t.valor;
+      } else if (t.tipo === "despesa") {
+        acc.expense += t.valor;
+        acc.balance -= t.valor;
+      } else if (t.tipo === "poupanca") {
+        acc.savings += t.valor;
+      }
+      return acc;
+    },
+    { balance: 0, income: 0, expense: 0, savings: 0 }
+  );
+
+  return totals;
+}
+
 
 export function exportTransactionsJSON() {
   const data = {
@@ -92,4 +100,3 @@ export function exportTransactionsCSV() {
 
   return lines.join("\n");
 }
-

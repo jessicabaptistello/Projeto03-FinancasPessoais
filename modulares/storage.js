@@ -1,4 +1,15 @@
-const KEY = "transactions_v1"; 
+const KEY = "transactions_v1";
+
+function normalizeTransaction(t) {
+  return {
+    id: t?.id ?? `${Date.now()}-${Math.floor(Math.random() * 100000)}`,
+    descricao: t?.descricao ?? "",
+    valor: Number(t?.valor) || 0,
+    tipo: t?.tipo ?? "receita",
+    categoria: t?.categoria ?? "Outros",
+    data: t?.data ?? t?.date ?? "", 
+  };
+}
 
 export function loadTransactions() {
   const raw = localStorage.getItem(KEY);
@@ -6,7 +17,8 @@ export function loadTransactions() {
 
   try {
     const data = JSON.parse(raw);
-    return Array.isArray(data) ? data : []; 
+    if (!Array.isArray(data)) return [];
+    return data.map(normalizeTransaction);
   } catch {
     return [];
   }

@@ -183,3 +183,17 @@
   text-align: center;
 }
 
+.filtros {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.filtro-texto,
+.filtro-tipo {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+}
