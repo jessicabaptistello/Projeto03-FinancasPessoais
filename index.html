@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <script type="module" src="app.js" defer></script>  
-  
+  <script type="module" src="app.js" defer></script>
+
   <link rel="stylesheet" href="css/rootEBody.css" />
   <link rel="stylesheet" href="css/titles.css" />
   <link rel="stylesheet" href="css/cardsAndContainers.css" />
   <link rel="stylesheet" href="css/buttons.css" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/responsividadeMobile.css" />
-    
+
   <title>Finanças Pessoais</title>
 </head>
 
@@ -42,13 +42,11 @@
         <div class="card">
           <div class="titulo-card">Rendimento total</div>
           <div class="valor" id="total-income">€ 0,00</div>
-          <!-- <div class="informacao">Soma das receitas</div> -->
         </div>
 
         <div class="card">
           <div class="titulo-card">Despesas acumuladas</div>
           <div class="valor expense-color" id="total-expense">€ 0,00</div>
-          <!-- <div class="informacao expense-color">Soma das despesas</div> -->
         </div>
 
         <div class="card">
@@ -63,13 +61,13 @@
       <div class="nova-transacao">
         <div class="titulo-nova-transacao-container">
           <p class="titulo-nova-transacao">Nova Transação</p>
-          <!-- <div class="nova-transacao-icon" title="Adicionar">+</div> -->
         </div>
 
         <div class="form-container">
           <div class="description-form">
             <label for="descricao">Descrição</label>
-            <input type="text" id="descricao" placeholder="ex. Renda mensal" />
+          
+            <input type="text" id="descricao" placeholder="ex. Renda mensal" maxlength="25" />
           </div>
 
           <div class="qtd-tipo-transacao-container">
@@ -120,6 +118,17 @@
           <button class="limpar-tudo" type="button" title="Apagar tudo">Limpar</button>
         </div>
 
+        >
+        <div class="filtros">
+          <input type="text" class="filtro-texto" placeholder="Pesquisar descrição..." />
+          <select class="filtro-tipo">
+            <option value="todos">Todos</option>
+            <option value="receita">Receita</option>
+            <option value="despesa">Despesa</option>
+            <option value="poupanca">Poupança</option>
+          </select>
+        </div>
+
         <div class="table-container">
           <div class="cabecalho-tabela">
             <span>TRANSAÇÃO</span>
@@ -129,6 +138,10 @@
           </div>
 
           <div class="lista-transacoes"></div>
+
+          <div class="rodape-tabela">
+            <!-- <a href="#" class="link-extrato">VER EXTRATO COMPLETO &rarr;</a> -->
+          </div>
         </div>
       </article>
     </section>

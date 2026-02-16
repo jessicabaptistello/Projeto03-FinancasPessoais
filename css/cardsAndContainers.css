@@ -162,3 +162,4 @@
 .item-transacao .valor-transacao.positivo { color: var(--income); }
 .item-transacao .valor-transacao.negativo { color: var(--expense); }
 .item-transacao .valor-transacao.neutro   { color: var(--accent); }
+

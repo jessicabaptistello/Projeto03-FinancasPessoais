@@ -1,19 +1,18 @@
-
-
 import { loadTransactions, saveTransactions } from "./storage.js";
 
 let transactions = loadTransactions();
 
-export function getTransactions() {
-  return [...transactions]; 
-}
 
-function makeId() {
-  return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+export function getTransactions() {
+  return [...transactions];
 }
 
 function persist() {
   saveTransactions(transactions);
+}
+
+function makeId() {
+  return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 }
 
 export function addTransaction({ descricao, valor, tipo, data, categoria }) {
@@ -40,7 +39,17 @@ export function clearAllTransactions() {
   persist();
 }
 
+
+export function updateTransaction(id, updatedFields) {
+  transactions = transactions.map((t) => {
+    if (t.id !== id) return t;
+    return { ...t, ...updatedFields };
+  });
+  persist();
+}
+
 export function getTotals() {
+  
   let balance = 0;
   let income = 0;
   let expense = 0;
@@ -92,4 +101,3 @@ export function exportTransactionsCSV() {
 
   return lines.join("\n");
 }
-

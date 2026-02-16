@@ -5,8 +5,8 @@
   gap: 8px;
 }
 
-
-.button-remover {
+.button-remover,
+.button-editar {
   margin-left: 8px;
   background: transparent;
   border: 1px solid var(--border);
@@ -21,4 +21,9 @@
 .button-remover:hover {
   color: var(--text);
   box-shadow: 0 0 0 4px rgba(179, 18, 74, 0.12);
+}
+
+.button-editar:hover {
+  color: var(--text);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
 }
