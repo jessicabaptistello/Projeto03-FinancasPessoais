@@ -17,7 +17,6 @@
 </head>
 
 <body>
-
   <header class="header">
     <div class="titulo-container">
       <h2 class="titulo">Visão geral</h2>
@@ -36,7 +35,7 @@
         <div class="card">
           <div class="titulo-card">Balanço</div>
           <div class="valor" id="total-balance">€ 0,00</div>
-          <div class="informacao">(atualizado automaticamente)</div>
+          <!-- <div class="informacao">(atualizado automaticamente)</div> -->
         </div>
 
         <div class="card">
@@ -52,7 +51,7 @@
         <div class="card">
           <div class="titulo-card">Poupança</div>
           <div class="valor" id="total-savings">€ 0,00</div>
-          <div class="informacao">Total poupado</div>
+          <!-- <div class="informacao">Total poupado</div> -->
         </div>
       </div>
     </section>
@@ -66,14 +65,15 @@
         <div class="form-container">
           <div class="description-form">
             <label for="descricao">Descrição</label>
-          
+            
             <input type="text" id="descricao" placeholder="ex. Renda mensal" maxlength="25" />
           </div>
 
           <div class="qtd-tipo-transacao-container">
             <div class="qtd-container">
               <label for="quantidade">Valor</label>
-              <input type="number" id="quantidade" placeholder="ex. 1000" />
+          
+              <input type="number" id="quantidade" placeholder="ex. 1000" min="0" max="9999999" />
             </div>
 
             <div class="tipo-transacao-container">
@@ -100,7 +100,7 @@
         </div>
 
         <div class="categoria-container">
-          <button class="categorias" type="button" data-category="Entretenimento">Lazer - Diversos</button>
+          <button class="categorias" type="button" data-category="Lazer">Lazer - Diversos</button>
           <button class="categorias" type="button" data-category="Saúde - Outros">Ginásio</button>
           <button class="categorias" type="button" data-category="Poupança">Outras Entradas</button>
         </div>
@@ -118,7 +118,7 @@
           <button class="limpar-tudo" type="button" title="Apagar tudo">Limpar</button>
         </div>
 
-        >
+        
         <div class="filtros">
           <input type="text" class="filtro-texto" placeholder="Pesquisar descrição..." />
           <select class="filtro-tipo">

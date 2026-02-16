@@ -1,20 +1,17 @@
 import { getTotals, removeTransaction, updateTransaction } from "./state.js";
+import { RULES } from "./rules.js";
 
 export const elements = {
   descricao: null,
   quantidade: null,
   tipo: null,
-
   buttonAdicionar: null,
   buttonLimpar: null,
-
   lista: null,
-
   totalBalance: null,
   totalIncome: null,
   totalExpense: null,
   totalSavings: null,
-
   categoriasbuttons: [],
   categoriaSelecionada: "Outros",
 };
@@ -22,7 +19,6 @@ export const elements = {
 function $(selector) {
   return document.querySelector(selector);
 }
-
 function byId(id) {
   return document.getElementById(id);
 }
@@ -57,7 +53,7 @@ export function initUI() {
   if (!elements.totalSavings) missing.push("#total-savings");
 
   if (missing.length > 0) {
-    console.error("Elementos não encontrados no HTML:", missing);
+    console.error("Elementos não encontrados:", missing);
     alert("Erro. Veja o Console (F12).");
     return false;
   }
@@ -75,9 +71,7 @@ function setStatusClass(el, status) {
 }
 
 export function setupCategoryButtons() {
-  const defaultBtn = elements.categoriasbuttons.find(
-    (b) => b.dataset.category === "Outros"
-  );
+  const defaultBtn = elements.categoriasbuttons.find((b) => b.dataset.category === "Outros");
   if (defaultBtn) defaultBtn.classList.add("is-active");
 
   for (const button of elements.categoriasbuttons) {
@@ -103,39 +97,145 @@ export function renderTotals() {
   setStatusClass(elements.totalSavings, "neutro");
 }
 
+
+function isValidDatePT(dateStr) {
+  const re = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+  const m = dateStr.match(re);
+  if (!m) return false;
+
+  const d = Number(m[1]);
+  const mo = Number(m[2]);
+  const y = Number(m[3]);
+
+  if (mo < 1 || mo > 12) return false;
+  if (d < 1 || d > 31) return false;
+  if (y < 1900 || y > 3000) return false;
+  return true;
+}
+
+
+function askDescricao(atual) {
+  while (true) {
+    const input = prompt(`Descrição (máx ${RULES.DESCRICAO_MAX}):`, atual);
+    if (input === null) return null;
+
+    const desc = input.trim();
+
+    if (desc.length === 0) {
+      alert("Descrição não pode ficar vazia.");
+      continue;
+    }
+
+    if (desc.length > RULES.DESCRICAO_MAX) {
+      alert(`Passou do limite. Máx: ${RULES.DESCRICAO_MAX} caracteres.`);
+      continue;
+    }
+
+    return desc;
+  }
+}
+
+function askValor(atual) {
+  while (true) {
+    const input = prompt(`Valor (máx 7 dígitos, até ${RULES.VALOR_MAX}):`, String(atual));
+    if (input === null) return null;
+
+    const txt = input.trim();
+
+ 
+    if (!/^\d+$/.test(txt)) {
+      alert("Digite apenas números (sem vírgula/ponto).");
+      continue;
+    }
+
+    
+    if (txt.length > RULES.VALOR_MAX_DIGITOS) {
+      alert("Passou do limite. Máx: 7 dígitos.");
+      continue;
+    }
+
+    const valor = Number(txt);
+
+    if (!valor || Number.isNaN(valor)) {
+      alert("Valor inválido.");
+      continue;
+    }
+
+    if (valor < RULES.VALOR_MIN) {
+      alert(`O valor deve ser maior que ${RULES.VALOR_MIN}.`);
+      continue;
+    }
+
+    if (valor > RULES.VALOR_MAX) {
+      alert(`O valor máximo permitido é ${RULES.VALOR_MAX}.`);
+      continue;
+    }
+
+    return valor;
+  }
+}
+
+function askTipo(atual) {
+  while (true) {
+    const input = prompt('Tipo: receita / despesa / poupanca', atual);
+    if (input === null) return null;
+
+    const tipo = input.trim().toLowerCase(); 
+
+    if (!["receita", "despesa", "poupanca"].includes(tipo)) {
+      alert("Tipo inválido. Escreva: receita, despesa ou poupanca.");
+      continue;
+    }
+
+    return tipo;
+  }
+}
+
+function askCategoria(atual) {
+  const input = prompt("Categoria:", atual);
+  if (input === null) return null;
+  return input.trim() || "Outros";
+}
+
+function askData(atual) {
+  while (true) {
+    const input = prompt('Data (dd/mm/aaaa) ou vazio:', atual);
+    if (input === null) return null;
+
+    const data = input.trim();
+
+    if (data === "") return ""; 
+
+    if (!isValidDatePT(data)) {
+      alert('Data inválida. Ex: 05/02/2026');
+      continue;
+    }
+
+    return data;
+  }
+}
+
+
 function editTransaction(t, refresh) {
-  const novaDescricao = prompt("Nova descrição:", t.descricao);
-  if (novaDescricao === null) return;
+  const descricao = askDescricao(t.descricao);
+  if (descricao === null) return;
 
-  const novoValorStr = prompt("Novo valor (apenas número):", String(t.valor));
-  if (novoValorStr === null) return;
+  const valor = askValor(t.valor);
+  if (valor === null) return;
 
-  const novoValor = Number(novoValorStr);
-  if (!novoValor || Number.isNaN(novoValor) || novoValor <= 0) {
-    alert("Valor inválido. Deve ser um número maior que 0.");
-    return;
-  }
+  const tipo = askTipo(t.tipo);
+  if (tipo === null) return;
 
-  const novoTipo = prompt('Novo tipo: "receita", "despesa" ou "poupanca"', t.tipo);
-  if (novoTipo === null) return;
+  const categoria = askCategoria(t.categoria || "Outros");
+  if (categoria === null) return;
 
-  if (!["receita", "despesa", "poupanca"].includes(novoTipo)) {
-    alert("Tipo inválido.");
-    return;
-  }
+  const data = askData(t.data || "");
+  if (data === null) return;
 
-  const novaCategoria = prompt("Nova categoria:", t.categoria || "Outros");
-  if (novaCategoria === null) return;
-
-  updateTransaction(t.id, {
-    descricao: novaDescricao.trim(),
-    valor: novoValor,
-    tipo: novoTipo,
-    categoria: novaCategoria.trim(),
-  });
-
+  updateTransaction(t.id, { descricao, valor, tipo, categoria, data });
   refresh();
 }
+
 
 function createTransactionItem(t, refresh) {
   const isDespesa = t.tipo === "despesa";
@@ -150,14 +250,9 @@ function createTransactionItem(t, refresh) {
       ? "etiqueta-receita"
       : "etiqueta-poupanca";
 
-  const etiquetaTexto = isDespesa
-    ? "DESPESA"
-    : isReceita
-      ? "RECEITA"
-      : "POUPANÇA";
+  const etiquetaTexto = isDespesa ? "DESPESA" : isReceita ? "RECEITA" : "POUPANÇA";
 
   const valorClass = isDespesa ? "negativo" : isPoupanca ? "neutro" : "positivo";
-
 
   const div = document.createElement("div");
   div.className = "item-transacao";
@@ -181,13 +276,11 @@ function createTransactionItem(t, refresh) {
     </div>
   `;
 
-  const btnEdit = div.querySelector(".button-editar");
-  btnEdit.addEventListener("click", () => {
+  div.querySelector(".button-editar").addEventListener("click", () => {
     editTransaction(t, refresh);
   });
 
-  const btnRemove = div.querySelector(".button-remover");
-  btnRemove.addEventListener("click", () => {
+  div.querySelector(".button-remover").addEventListener("click", () => {
     removeTransaction(t.id);
     refresh();
   });
@@ -197,7 +290,6 @@ function createTransactionItem(t, refresh) {
 
 export function renderList(transactions, refresh) {
   elements.lista.innerHTML = "";
-
   for (const t of transactions) {
     elements.lista.appendChild(createTransactionItem(t, refresh));
   }

@@ -1,11 +1,19 @@
 import { elements } from "./userInterface.js";
 import { addTransaction } from "./state.js";
+import { RULES } from "./rules.js";
 
-const MAX_DESCRICAO = 25;
 
 const categoriasPorTipo = {
   receita: ["Ordenado", "Outros"],
-  despesa: ["Alimentação", "Educação", "Habitação", "Saúde", "Entretenimento", "Saúde - Outros", "Outros"],
+  despesa: [
+    "Alimentação",
+    "Educação",
+    "Habitação",
+    "Saúde",
+    "Lazer",
+    "Saúde - Outros",
+    "Outros",
+  ],
   poupanca: ["Poupança", "Outros"],
 };
 
@@ -28,13 +36,23 @@ function isValid(data) {
     return false;
   }
 
-  if (data.descricao.length > MAX_DESCRICAO) {
-    alert(`A descrição deve ter no máximo ${MAX_DESCRICAO} caracteres.`);
+  if (data.descricao.length > RULES.DESCRICAO_MAX) {
+    alert(`A descrição deve ter no máximo ${RULES.DESCRICAO_MAX} caracteres.`);
     return false;
   }
 
-  if (!data.valor || Number.isNaN(data.valor) || data.valor <= 0) {
-    alert("Insira um valor numérico positivo (maior que 0).");
+  if (!data.valor || Number.isNaN(data.valor)) {
+    alert("Insira um valor numérico válido.");
+    return false;
+  }
+
+  if (data.valor < RULES.VALOR_MIN) {
+    alert(`O valor deve ser maior que ${RULES.VALOR_MIN}.`);
+    return false;
+  }
+
+  if (data.valor > RULES.VALOR_MAX) {
+    alert(`O valor máximo permitido é ${RULES.VALOR_MAX}.`);
     return false;
   }
 
@@ -45,7 +63,7 @@ function isValid(data) {
   }
 
   const permitidas = categoriasPorTipo[data.tipo] || [];
-  if (permitidas.length > 0 && !permitidas.includes(data.categoria)) {
+  if (!permitidas.includes(data.categoria)) {
     alert(`A categoria "${data.categoria}" não combina com o tipo "${data.tipo}".`);
     return false;
   }
@@ -68,7 +86,7 @@ export function submitTransaction(refresh) {
     valor: data.valor,
     tipo: data.tipo,
     categoria: data.categoria,
-    data: todayPT(),
+    data: todayPT(), 
   });
 
   clearForm();

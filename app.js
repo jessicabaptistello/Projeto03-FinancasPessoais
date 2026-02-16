@@ -16,11 +16,28 @@ import {
 import { submitTransaction } from "./modulares/transactions.js";
 
 
-function setupCalendar() {
+function setupCalendarTop() {
   const calendarioEl = document.querySelector(".calendario");
   if (!calendarioEl) return;
 
   calendarioEl.textContent = `Hoje: ${new Date().toLocaleDateString("pt-PT")}`;
+}
+
+function setupLimitValueInput() {
+  if (!elements.quantidade) return;
+
+ 
+  elements.quantidade.addEventListener("keydown", (e) => {
+    const blocked = ["e", "E", "+", "-"];
+    if (blocked.includes(e.key)) e.preventDefault();
+  });
+
+ 
+  elements.quantidade.addEventListener("input", () => {
+    let digits = elements.quantidade.value.replace(/\D/g, "");
+    if (digits.length > 7) digits = digits.slice(0, 7);
+    elements.quantidade.value = digits;
+  });
 }
 
 
@@ -32,11 +49,9 @@ function applyFilters(transactions) {
   const tipo = select?.value || "todos";
 
   return transactions.filter((t) => {
-    const matchTexto =
-      texto === "" || (t.descricao || "").toLowerCase().includes(texto);
-
+    const desc = (t.descricao || "").toLowerCase();
+    const matchTexto = texto === "" || desc.includes(texto);
     const matchTipo = tipo === "todos" || t.tipo === tipo;
-
     return matchTexto && matchTipo;
   });
 }
@@ -66,14 +81,14 @@ function downloadFile({ filename, content, mimeType }) {
 }
 
 
-function setupButtonsAndFilters() {
+function setupButtons() {
   
   elements.buttonAdicionar.addEventListener("click", (e) => {
     e.preventDefault();
     submitTransaction(refresh);
   });
 
-  
+ 
   elements.buttonLimpar.addEventListener("click", () => {
     const ok = confirm("Tem certeza que deseja excluir todas as transações?");
     if (!ok) return;
@@ -82,7 +97,7 @@ function setupButtonsAndFilters() {
     refresh();
   });
 
-  
+ 
   const exportBtn = document.querySelector(".exportar");
   if (exportBtn) {
     exportBtn.addEventListener("click", () => {
@@ -111,20 +126,22 @@ function setupButtonsAndFilters() {
     });
   }
 
+ 
   const input = document.querySelector(".filtro-texto");
   const select = document.querySelector(".filtro-tipo");
-
   if (input) input.addEventListener("input", refresh);
   if (select) select.addEventListener("change", refresh);
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const ok = initUI();
   if (!ok) return;
 
-  setupCalendar();
+  setupCalendarTop();
   setupCategoryButtons();
-  setupButtonsAndFilters();
+  setupLimitValueInput(); 
+  setupButtons();
 
   refresh();
 });
