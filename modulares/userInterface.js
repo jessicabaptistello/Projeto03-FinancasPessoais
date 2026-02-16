@@ -5,12 +5,9 @@ export const elements = {
   descricao: null,
   quantidade: null,
   tipo: null,
-
   buttonAdicionar: null,
   buttonLimpar: null,
-
   lista: null,
-
   totalBalance: null,
   totalIncome: null,
   totalExpense: null,

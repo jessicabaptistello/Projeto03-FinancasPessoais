@@ -11,7 +11,7 @@ const categoriasPorTipo = {
     "Habitação",
     "Saúde",
     "Lazer",
-    "Saúde - Outros",
+    "Ginásio",
     "Outros",
   ],
   poupanca: ["Poupança", "Outros"],
@@ -54,7 +54,6 @@ function converterValorTextoParaNumero(valorTexto) {
 }
 
 function validarFormulario(data) {
-  /* descrição */
   if (!data.descricao) {
     alert("Preencha a descrição.");
     return false;
