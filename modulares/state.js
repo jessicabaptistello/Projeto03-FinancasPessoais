@@ -1,78 +1,54 @@
-import { loadTransactions, saveTransactions } from "./storage.js";
-import { RULES } from "./rules.js";
+import { carregarTransacoes, guardarTransacoes } from "./storage.js";
 
-let transactions = loadTransactions();
+let transacoes = carregarTransacoes();
 
-export function getTransactions() {
-  return [...transactions];
+export function obterTransacoes() {
+  return [...transacoes];
 }
 
-function persist() {
-  saveTransactions(transactions);
+function salvar() {
+  guardarTransacoes(transacoes);
 }
 
-function makeId() {
+function criarId() {
   return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 }
 
-function normalizeNumberTo2Decimals(value) {
-  const n = Number(value);
-  if (!n || Number.isNaN(n)) return 0;
-  return Number(n.toFixed(2));
-}
-
-function sanitizeTransaction(t) {
-  const descricao = String(t.descricao ?? "").trim().slice(0, RULES.DESCRICAO_MAX);
-
-  let valor = normalizeNumberTo2Decimals(t.valor);
-
-  if (valor < 0) valor = 0;
-  if (valor > RULES.VALOR_MAX) valor = RULES.VALOR_MAX;
-
-  return {
-    id: t.id ?? makeId(),
-    descricao,
-    valor,
-    tipo: t.tipo ?? "receita",
-    categoria: String(t.categoria ?? "Outros").trim(),
-    data: String(t.data ?? "").trim(),
+export function adicionarTransacao(nova) {
+  const transacao = {
+    id: criarId(),
+    descricao: nova.descricao,
+    valor: Number(nova.valor) || 0,
+    tipo: nova.tipo,
+    categoria: nova.categoria || "Outros",
+    data: nova.data || "",
   };
+
+  transacoes = [transacao, ...transacoes];
+  salvar();
 }
 
-export function addTransaction({ descricao, valor, tipo, data, categoria }) {
-  const transaction = sanitizeTransaction({
-    id: makeId(),
-    descricao,
-    valor,
-    tipo,
-    data,
-    categoria,
-  });
-
-  transactions = [transaction, ...transactions];
-  persist();
+export function removerTransacao(id) {
+  transacoes = transacoes.filter((t) => t.id !== id);
+  salvar();
 }
 
-export function removeTransaction(id) {
-  transactions = transactions.filter((t) => t.id !== id);
-  persist();
+export function limparTudo() {
+  transacoes = [];
+  salvar();
 }
 
-export function clearAllTransactions() {
-  transactions = [];
-  persist();
-}
-
-export function updateTransaction(id, updatedFields) {
-  transactions = transactions.map((t) => {
+export function atualizarTransacao(id, camposAtualizados) {
+  transacoes = transacoes.map((t) => {
     if (t.id !== id) return t;
-    return sanitizeTransaction({ ...t, ...updatedFields });
+    return { ...t, ...camposAtualizados };
   });
-  persist();
+
+  salvar();
 }
 
-export function getTotals() {
-  return transactions.reduce(
+export function calcularTotais() {
+  return transacoes.reduce(
     (acc, t) => {
       if (t.tipo === "receita") {
         acc.income += t.valor;
@@ -89,19 +65,16 @@ export function getTotals() {
   );
 }
 
-export function exportTransactionsJSON() {
-  return JSON.stringify(
-    {
-      exportedAt: new Date().toISOString(),
-      total: transactions.length,
-      transactions,
-    },
-    null,
-    2
-  );
+export function exportarJSON() {
+  const data = {
+    exportedAt: new Date().toISOString(),
+    total: transacoes.length,
+    transactions: transacoes,
+  };
+  return JSON.stringify(data, null, 2);
 }
 
-export function exportTransactionsCSV() {
+export function exportarCSV() {
   const header = ["id", "descricao", "valor", "tipo", "categoria", "data"];
 
   function escapeCSV(v) {
@@ -114,7 +87,7 @@ export function exportTransactionsCSV() {
 
   const lines = [header.join(",")];
 
-  for (const t of transactions) {
+  for (const t of transacoes) {
     lines.push([t.id, t.descricao, t.valor, t.tipo, t.categoria, t.data].map(escapeCSV).join(","));
   }
 
