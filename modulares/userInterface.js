@@ -1,4 +1,4 @@
-import { getTotals, removeTransaction, updateTransaction } from "./state.js";
+import { calcularTotais, removerTransacao, atualizarTransacao } from "./state.js";
 import { RULES } from "./rules.js";
 
 export const elements = {
@@ -12,6 +12,7 @@ export const elements = {
   totalIncome: null,
   totalExpense: null,
   totalSavings: null,
+
   categoriasbuttons: [],
   categoriaSelecionada: "Outros",
 };
@@ -84,7 +85,7 @@ export function setupCategoryButtons() {
 }
 
 export function renderTotals() {
-  const { balance, income, expense, savings } = getTotals();
+  const { balance, income, expense, savings } = calcularTotais();
 
   elements.totalBalance.textContent = formatEUR(balance);
   elements.totalIncome.textContent = formatEUR(income);
@@ -97,147 +98,75 @@ export function renderTotals() {
   setStatusClass(elements.totalSavings, "neutro");
 }
 
-
-function isValidDatePT(dateStr) {
-  const re = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
-  const m = dateStr.match(re);
-  if (!m) return false;
-
-  const d = Number(m[1]);
-  const mo = Number(m[2]);
-  const y = Number(m[3]);
-
-  if (mo < 1 || mo > 12) return false;
-  if (d < 1 || d > 31) return false;
-  if (y < 1900 || y > 3000) return false;
-  return true;
-}
-
-
-function askDescricao(atual) {
+function pedirDescricao(atual) {
   while (true) {
     const input = prompt(`Descrição (máx ${RULES.DESCRICAO_MAX}):`, atual);
     if (input === null) return null;
 
     const desc = input.trim();
-
-    if (desc.length === 0) {
+    if (!desc) {
       alert("Descrição não pode ficar vazia.");
       continue;
     }
-
     if (desc.length > RULES.DESCRICAO_MAX) {
-      alert(`Passou do limite. Máx: ${RULES.DESCRICAO_MAX} caracteres.`);
+      alert(`Máximo ${RULES.DESCRICAO_MAX} caracteres.`);
       continue;
     }
-
     return desc;
   }
 }
 
-function askValor(atual) {
+function pedirValor(atual) {
   while (true) {
-    const input = prompt(`Valor (máx 7 dígitos, até ${RULES.VALOR_MAX}):`, String(atual));
+    const input = prompt("Valor (ex: 10,50):", String(atual));
     if (input === null) return null;
 
     const txt = input.trim();
 
- 
-    if (!/^\d+$/.test(txt)) {
-      alert("Digite apenas números (sem vírgula/ponto).");
+    const pattern = /^\d+([.,]\d{1,2})?$/;
+    if (!pattern.test(txt)) {
+      alert("Valor inválido. Ex: 10,50 ou 10.50");
       continue;
     }
 
-    
-    if (txt.length > RULES.VALOR_MAX_DIGITOS) {
-      alert("Passou do limite. Máx: 7 dígitos.");
+    const normal = txt.replace(",", ".");
+    const [inteiro, dec = ""] = normal.split(".");
+
+    if (inteiro.length > RULES.VALOR_MAX_DIGITOS_INTEIRO) {
+      alert("Máximo 7 dígitos antes da vírgula.");
+      continue;
+    }
+    if (dec.length > RULES.VALOR_MAX_DECIMAIS) {
+      alert("Máximo 2 casas decimais.");
       continue;
     }
 
-    const valor = Number(txt);
-
-    if (!valor || Number.isNaN(valor)) {
+    const num = Number(normal);
+    if (!num || Number.isNaN(num)) {
       alert("Valor inválido.");
       continue;
     }
 
-    if (valor < RULES.VALOR_MIN) {
+    if (num < RULES.VALOR_MIN) {
       alert(`O valor deve ser maior que ${RULES.VALOR_MIN}.`);
       continue;
     }
-
-    if (valor > RULES.VALOR_MAX) {
+    if (num > RULES.VALOR_MAX) {
       alert(`O valor máximo permitido é ${RULES.VALOR_MAX}.`);
       continue;
     }
 
-    return valor;
+    return Number(num.toFixed(2));
   }
 }
 
-function askTipo(atual) {
-  while (true) {
-    const input = prompt('Tipo: receita / despesa / poupanca', atual);
-    if (input === null) return null;
-
-    const tipo = input.trim().toLowerCase(); 
-
-    if (!["receita", "despesa", "poupanca"].includes(tipo)) {
-      alert("Tipo inválido. Escreva: receita, despesa ou poupanca.");
-      continue;
-    }
-
-    return tipo;
-  }
-}
-
-function askCategoria(atual) {
-  const input = prompt("Categoria:", atual);
+function pedirData(atual) {
+  const input = prompt("Data (dd/mm/aaaa):", atual);
   if (input === null) return null;
-  return input.trim() || "Outros";
+  return input.trim();
 }
 
-function askData(atual) {
-  while (true) {
-    const input = prompt('Data (dd/mm/aaaa) ou vazio:', atual);
-    if (input === null) return null;
-
-    const data = input.trim();
-
-    if (data === "") return ""; 
-
-    if (!isValidDatePT(data)) {
-      alert('Data inválida. Ex: 05/02/2026');
-      continue;
-    }
-
-    return data;
-  }
-}
-
-
-function editTransaction(t, refresh) {
-  const descricao = askDescricao(t.descricao);
-  if (descricao === null) return;
-
-  const valor = askValor(t.valor);
-  if (valor === null) return;
-
-  const tipo = askTipo(t.tipo);
-  if (tipo === null) return;
-
-  const categoria = askCategoria(t.categoria || "Outros");
-  if (categoria === null) return;
-
-  const data = askData(t.data || "");
-  if (data === null) return;
-
-  updateTransaction(t.id, { descricao, valor, tipo, categoria, data });
-  refresh();
-}
-
-
-function createTransactionItem(t, refresh) {
+function criarItemTransacao(t, refresh) {
   const isDespesa = t.tipo === "despesa";
   const isReceita = t.tipo === "receita";
   const isPoupanca = t.tipo === "poupanca";
@@ -247,8 +176,8 @@ function createTransactionItem(t, refresh) {
   const etiquetaClass = isDespesa
     ? "etiqueta-despesa"
     : isReceita
-      ? "etiqueta-receita"
-      : "etiqueta-poupanca";
+    ? "etiqueta-receita"
+    : "etiqueta-poupanca";
 
   const etiquetaTexto = isDespesa ? "DESPESA" : isReceita ? "RECEITA" : "POUPANÇA";
 
@@ -270,18 +199,36 @@ function createTransactionItem(t, refresh) {
     <div class="data-transacao">${t.data || "-"}</div>
 
     <div class="valor-transacao ${valorClass}">
-      ${formatEUR(valorAssinado)}
-      <button class="button-editar" type="button" title="Editar">✏️</button>
-      <button class="button-remover" type="button" title="Remover">🗑️</button>
+      <span class="valor-numero">${formatEUR(valorAssinado)}</span>
+
+      <span class="acoes-fixas">
+        <button class="button-editar" type="button" title="Editar">✏️</button>
+        <button class="button-remover" type="button" title="Remover">🗑️</button>
+      </span>
     </div>
   `;
 
   div.querySelector(".button-editar").addEventListener("click", () => {
-    editTransaction(t, refresh);
+    const novaDescricao = pedirDescricao(t.descricao);
+    if (novaDescricao === null) return;
+
+    const novoValor = pedirValor(t.valor);
+    if (novoValor === null) return;
+
+    const novaData = pedirData(t.data);
+    if (novaData === null) return;
+
+    atualizarTransacao(t.id, {
+      descricao: novaDescricao,
+      valor: novoValor,
+      data: novaData,
+    });
+
+    refresh();
   });
 
   div.querySelector(".button-remover").addEventListener("click", () => {
-    removeTransaction(t.id);
+    removerTransacao(t.id);
     refresh();
   });
 
@@ -291,6 +238,6 @@ function createTransactionItem(t, refresh) {
 export function renderList(transactions, refresh) {
   elements.lista.innerHTML = "";
   for (const t of transactions) {
-    elements.lista.appendChild(createTransactionItem(t, refresh));
+    elements.lista.appendChild(criarItemTransacao(t, refresh));
   }
 }

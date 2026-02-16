@@ -72,8 +72,7 @@
           <div class="qtd-tipo-transacao-container">
             <div class="qtd-container">
               <label for="quantidade">Valor</label>
-          
-              <input type="number" id="quantidade" placeholder="ex. 1000" min="0" max="9999999" />
+              <input type="text" id="quantidade" placeholder="ex. 1000,50" inputmode="decimal" autocomplete="off" />
             </div>
 
             <div class="tipo-transacao-container">
@@ -101,7 +100,7 @@
 
         <div class="categoria-container">
           <button class="categorias" type="button" data-category="Lazer">Lazer - Diversos</button>
-          <button class="categorias" type="button" data-category="Saúde - Outros">Ginásio</button>
+          <button class="categorias" type="button" data-category="Ginásio">Ginásio</button>
           <button class="categorias" type="button" data-category="Poupança">Outras Entradas</button>
         </div>
 
@@ -120,7 +119,7 @@
 
         
         <div class="filtros">
-          <input type="text" class="filtro-texto" placeholder="Pesquisar descrição..." />
+          <input type="text" class="filtro-texto" placeholder="Pesquisar..." />
           <select class="filtro-tipo">
             <option value="todos">Todos</option>
             <option value="receita">Receita</option>
