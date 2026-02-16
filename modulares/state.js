@@ -49,26 +49,25 @@ export function updateTransaction(id, updatedFields) {
 }
 
 export function getTotals() {
-  
-  let balance = 0;
-  let income = 0;
-  let expense = 0;
-  let savings = 0;
+  const totals = transactions.reduce(
+    (acc, t) => {
+      if (t.tipo === "receita") {
+        acc.income += t.valor;
+        acc.balance += t.valor;
+      } else if (t.tipo === "despesa") {
+        acc.expense += t.valor;
+        acc.balance -= t.valor;
+      } else if (t.tipo === "poupanca") {
+        acc.savings += t.valor;
+      }
+      return acc;
+    },
+    { balance: 0, income: 0, expense: 0, savings: 0 }
+  );
 
-  for (const t of transactions) {
-    if (t.tipo === "receita") {
-      income += t.valor;
-      balance += t.valor;
-    } else if (t.tipo === "despesa") {
-      expense += t.valor;
-      balance -= t.valor;
-    } else if (t.tipo === "poupanca") {
-      savings += t.valor;
-    }
-  }
-
-  return { balance, income, expense, savings };
+  return totals;
 }
+
 
 export function exportTransactionsJSON() {
   const data = {
