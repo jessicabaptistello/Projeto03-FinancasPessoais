@@ -1,7 +1,7 @@
 import { loadTransactions, saveTransactions } from "./storage.js";
+import { RULES } from "./rules.js";
 
 let transactions = loadTransactions();
-
 
 export function getTransactions() {
   return [...transactions];
@@ -15,15 +15,37 @@ function makeId() {
   return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 }
 
+function clampText(text, max) {
+  return String(text ?? "").trim().slice(0, max);
+}
+
+function clampDigits7(value) {
+  return String(value ?? "").replace(/\D/g, "").slice(0, RULES.VALOR_MAX_DIGITOS);
+}
+
+function sanitizeTransaction(t) {
+  const digits = clampDigits7(t.valor);
+  const num = Number(digits);
+
+  return {
+    id: t.id ?? makeId(),
+    descricao: clampText(t.descricao, RULES.DESCRICAO_MAX),
+    valor: Number.isNaN(num) ? 0 : Math.min(num, RULES.VALOR_MAX),
+    tipo: t.tipo ?? "receita",
+    categoria: String(t.categoria ?? "Outros").trim(),
+    data: String(t.data ?? "").trim(),
+  };
+}
+
 export function addTransaction({ descricao, valor, tipo, data, categoria }) {
-  const transaction = {
+  const transaction = sanitizeTransaction({
     id: makeId(),
     descricao,
     valor,
     tipo,
     data,
     categoria,
-  };
+  });
 
   transactions = [transaction, ...transactions];
   persist();
@@ -39,17 +61,16 @@ export function clearAllTransactions() {
   persist();
 }
 
-
 export function updateTransaction(id, updatedFields) {
   transactions = transactions.map((t) => {
     if (t.id !== id) return t;
-    return { ...t, ...updatedFields };
+    return sanitizeTransaction({ ...t, ...updatedFields });
   });
   persist();
 }
 
 export function getTotals() {
-  const totals = transactions.reduce(
+  return transactions.reduce(
     (acc, t) => {
       if (t.tipo === "receita") {
         acc.income += t.valor;
@@ -64,25 +85,25 @@ export function getTotals() {
     },
     { balance: 0, income: 0, expense: 0, savings: 0 }
   );
-
-  return totals;
 }
 
-
 export function exportTransactionsJSON() {
-  const data = {
-    exportedAt: new Date().toISOString(),
-    total: transactions.length,
-    transactions,
-  };
-  return JSON.stringify(data, null, 2);
+  return JSON.stringify(
+    {
+      exportedAt: new Date().toISOString(),
+      total: transactions.length,
+      transactions,
+    },
+    null,
+    2
+  );
 }
 
 export function exportTransactionsCSV() {
   const header = ["id", "descricao", "valor", "tipo", "categoria", "data"];
 
-  function escapeCSV(value) {
-    const s = String(value ?? "");
+  function escapeCSV(v) {
+    const s = String(v ?? "");
     if (s.includes(",") || s.includes('"') || s.includes("\n")) {
       return `"${s.replaceAll('"', '""')}"`;
     }
@@ -92,10 +113,7 @@ export function exportTransactionsCSV() {
   const lines = [header.join(",")];
 
   for (const t of transactions) {
-    const row = [t.id, t.descricao, t.valor, t.tipo, t.categoria, t.data]
-      .map(escapeCSV)
-      .join(",");
-    lines.push(row);
+    lines.push([t.id, t.descricao, t.valor, t.tipo, t.categoria, t.data].map(escapeCSV).join(","));
   }
 
   return lines.join("\n");

@@ -1,5 +1,6 @@
 const KEY = "transactions_v1";
 
+
 function normalizeTransaction(t) {
   return {
     id: t?.id ?? `${Date.now()}-${Math.floor(Math.random() * 100000)}`,
