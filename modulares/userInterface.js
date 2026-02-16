@@ -5,13 +5,17 @@ export const elements = {
   descricao: null,
   quantidade: null,
   tipo: null,
+
   buttonAdicionar: null,
   buttonLimpar: null,
+
   lista: null,
+
   totalBalance: null,
   totalIncome: null,
   totalExpense: null,
   totalSavings: null,
+
   categoriasbuttons: [],
   categoriaSelecionada: "Outros",
 };
@@ -97,7 +101,6 @@ export function renderTotals() {
   setStatusClass(elements.totalSavings, "neutro");
 }
 
-
 function isValidDatePT(dateStr) {
   const re = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
   const m = dateStr.match(re);
@@ -110,9 +113,32 @@ function isValidDatePT(dateStr) {
   if (mo < 1 || mo > 12) return false;
   if (d < 1 || d > 31) return false;
   if (y < 1900 || y > 3000) return false;
+
   return true;
 }
 
+function isMoneyTextValid(valorTexto) {
+  const txt = String(valorTexto).trim();
+
+  const pattern = /^\d+([.,]\d{1,2})?$/;
+  if (!pattern.test(txt)) return false;
+
+  const normalized = txt.replace(",", ".");
+  const parts = normalized.split(".");
+  const inteiro = parts[0] || "";
+  const decimal = parts[1] || "";
+
+  if (inteiro.length > RULES.VALOR_MAX_DIGITOS_INTEIRO) return false;
+  if (decimal.length > RULES.VALOR_MAX_DECIMAIS) return false;
+
+  return true;
+}
+
+function convertMoneyTextToNumber(valorTexto) {
+  const normalized = String(valorTexto).trim().replace(",", ".");
+  const n = Number(normalized);
+  return n;
+}
 
 function askDescricao(atual) {
   while (true) {
@@ -135,52 +161,49 @@ function askDescricao(atual) {
   }
 }
 
-function askValor(atual) {
+function askValorComDecimais(atual) {
   while (true) {
-    const input = prompt(`Valor (máx 7 dígitos, até ${RULES.VALOR_MAX}):`, String(atual));
+    const input = prompt(
+      `Valor (até 7 dígitos + 2 decimais). Ex: 10,50`,
+      String(atual)
+    );
+
     if (input === null) return null;
 
     const txt = input.trim();
 
- 
-    if (!/^\d+$/.test(txt)) {
-      alert("Digite apenas números (sem vírgula/ponto).");
+    if (!isMoneyTextValid(txt)) {
+      alert("Valor inválido. Use exemplo: 10,50 ou 10.50 (máx 7 dígitos e 2 decimais).");
       continue;
     }
 
-    
-    if (txt.length > RULES.VALOR_MAX_DIGITOS) {
-      alert("Passou do limite. Máx: 7 dígitos.");
-      continue;
-    }
+    const numero = convertMoneyTextToNumber(txt);
 
-    const valor = Number(txt);
-
-    if (!valor || Number.isNaN(valor)) {
+    if (!numero || Number.isNaN(numero)) {
       alert("Valor inválido.");
       continue;
     }
 
-    if (valor < RULES.VALOR_MIN) {
+    if (numero < RULES.VALOR_MIN) {
       alert(`O valor deve ser maior que ${RULES.VALOR_MIN}.`);
       continue;
     }
 
-    if (valor > RULES.VALOR_MAX) {
+    if (numero > RULES.VALOR_MAX) {
       alert(`O valor máximo permitido é ${RULES.VALOR_MAX}.`);
       continue;
     }
 
-    return valor;
+    return Number(numero.toFixed(2));
   }
 }
 
-function askTipo(atual) {
+function askTipoCaseInsensitive(atual) {
   while (true) {
     const input = prompt('Tipo: receita / despesa / poupanca', atual);
     if (input === null) return null;
 
-    const tipo = input.trim().toLowerCase(); 
+    const tipo = input.trim().toLowerCase();
 
     if (!["receita", "despesa", "poupanca"].includes(tipo)) {
       alert("Tipo inválido. Escreva: receita, despesa ou poupanca.");
@@ -204,8 +227,7 @@ function askData(atual) {
 
     const data = input.trim();
 
-    if (data === "") return ""; 
-
+    if (data === "") return "";
     if (!isValidDatePT(data)) {
       alert('Data inválida. Ex: 05/02/2026');
       continue;
@@ -215,15 +237,14 @@ function askData(atual) {
   }
 }
 
-
 function editTransaction(t, refresh) {
   const descricao = askDescricao(t.descricao);
   if (descricao === null) return;
 
-  const valor = askValor(t.valor);
+  const valor = askValorComDecimais(t.valor);
   if (valor === null) return;
 
-  const tipo = askTipo(t.tipo);
+  const tipo = askTipoCaseInsensitive(t.tipo);
   if (tipo === null) return;
 
   const categoria = askCategoria(t.categoria || "Outros");
@@ -235,7 +256,6 @@ function editTransaction(t, refresh) {
   updateTransaction(t.id, { descricao, valor, tipo, categoria, data });
   refresh();
 }
-
 
 function createTransactionItem(t, refresh) {
   const isDespesa = t.tipo === "despesa";

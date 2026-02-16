@@ -15,22 +15,24 @@ function makeId() {
   return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 }
 
-function clampText(text, max) {
-  return String(text ?? "").trim().slice(0, max);
-}
-
-function clampDigits7(value) {
-  return String(value ?? "").replace(/\D/g, "").slice(0, RULES.VALOR_MAX_DIGITOS);
+function normalizeNumberTo2Decimals(value) {
+  const n = Number(value);
+  if (!n || Number.isNaN(n)) return 0;
+  return Number(n.toFixed(2));
 }
 
 function sanitizeTransaction(t) {
-  const digits = clampDigits7(t.valor);
-  const num = Number(digits);
+  const descricao = String(t.descricao ?? "").trim().slice(0, RULES.DESCRICAO_MAX);
+
+  let valor = normalizeNumberTo2Decimals(t.valor);
+
+  if (valor < 0) valor = 0;
+  if (valor > RULES.VALOR_MAX) valor = RULES.VALOR_MAX;
 
   return {
     id: t.id ?? makeId(),
-    descricao: clampText(t.descricao, RULES.DESCRICAO_MAX),
-    valor: Number.isNaN(num) ? 0 : Math.min(num, RULES.VALOR_MAX),
+    descricao,
+    valor,
     tipo: t.tipo ?? "receita",
     categoria: String(t.categoria ?? "Outros").trim(),
     data: String(t.data ?? "").trim(),
